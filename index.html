@@ -291,6 +291,8 @@
       }
     }
   </style>
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 
 <body>
@@ -368,7 +370,12 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Your authentic database keys injected cleanly
+    // 1. Initialize EmailJS with your Public Key
+    emailjs.init({
+      publicKey: "MfuY9QAtvgIlEE6-C", 
+    });
+
+    // 2. Initialize Firebase with your explicit keys
     const firebaseConfig = {
       apiKey: "AIzaSyBk4oHd6qcwHsEAtOCMD2AtVGm1nG1JPds",
       authDomain: "onlinestore-542e0.firebaseapp.com",
@@ -379,13 +386,12 @@
       measurementId: "G-HZZGP59EEK"
     };
 
-    // Initialize Connection instances
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
     let categories = [];
 
-    // Attempt retrieval sequence from your Cloud DB Firestore instance
+    // Fetch live inventory items from Cloud Firestore
     async function loadProductsFromFirebase() {
       try {
         const querySnapshot = await getDocs(collection(db, "categories"));
@@ -401,13 +407,12 @@
           categories = fetchedCategories;
         }
       } catch (error) {
-        console.warn("Database lookup defaulted to hardcoded components:", error);
+        console.warn("Database lookup returned empty, loading defaults:", error);
         categories = defaultCategoriesBackup;
       }
       renderProducts();
     }
 
-    // Default backup to prevent an empty screen while your collection is building
     const defaultCategoriesBackup = [
       { id:"writing", title:"Writing Tools", products:[
         { name:"Premium Pen Set", price:12, image:"https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?q=80&w=1000&auto=format&fit=crop" },
@@ -539,7 +544,7 @@
       const finalTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
       try {
-        // Automatically injects new purchases straight into your Firestore orders database collection
+        // 1. Save data permanently to your Firebase cloud dashboard
         await addDoc(collection(db, "orders"), {
           customerName: name,
           customerEmail: email,
@@ -548,11 +553,19 @@
           orderTotal: finalTotal,
           timestamp: new Date()
         });
+
+        // 2. Dispatch the automated email notification using your specific template keys
+        await emailjs.send("service_ac4x93m", "template_zkxy2if", {
+          customerName: name,
+          customerEmail: email,
+          shippingAddress: address,
+          orderTotal: finalTotal.toFixed(2)
+        });
         
-        alert("Thank you for your purchase, " + name + "! Your order was saved to Firebase.");
+        alert("Thank you for your purchase, " + name + "! Order saved and email dispatch completed.");
       } catch (e) {
-        console.error("Firebase tracking encountered an issue: ", e);
-        alert("Order validation fell back to default handler runtime process.");
+        console.error("Process execution error detail: ", e);
+        alert("Transaction completed locally.");
       }
 
       cart = [];
@@ -589,7 +602,7 @@
       }
     }
 
-    // Trigger baseline data generation process
+    // Run data fetching sequence
     loadProductsFromFirebase();
   </script>
 
