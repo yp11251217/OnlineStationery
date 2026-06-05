@@ -1,397 +1,597 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Cookie Factory</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StudyHub Store</title>
 
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, sans-serif;
-}
-
-body{
-    background:#f4f1ee;
-    color:#3b2f2f;
-}
-
-header{
-    background:#8b5e3c;
-    color:white;
-    padding:20px;
-    text-align:center;
-}
-
-.container{
-    width:90%;
-    max-width:1200px;
-    margin:20px auto;
-}
-
-.card{
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-    margin-bottom:20px;
-}
-
-h2{
-    margin-bottom:15px;
-}
-
-input, textarea, select{
-    width:100%;
-    padding:10px;
-    margin:8px 0;
-    border:1px solid #ccc;
-    border-radius:6px;
-}
-
-button{
-    background:#8b5e3c;
-    color:white;
-    border:none;
-    padding:10px 16px;
-    border-radius:6px;
-    cursor:pointer;
-}
-
-button:hover{
-    background:#6f472e;
-}
-
-.auth-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:20px;
-}
-
-.products{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:20px;
-}
-
-.product{
-    background:#fffaf5;
-    padding:15px;
-    border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.1);
-}
-
-.product h3{
-    margin-bottom:10px;
-}
-
-.price{
-    color:#2e7d32;
-    font-weight:bold;
-    margin:10px 0;
-}
-
-.hidden{
-    display:none;
-}
-
-.order-item{
-    padding:15px;
-    border-bottom:1px solid #ddd;
-}
-
-.user-info{
-    margin-top:10px;
-    font-weight:bold;
-    color:#8b5e3c;
-}
-
-@media(max-width:768px){
-    .auth-grid{
-        grid-template-columns:1fr;
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial,sans-serif;
     }
-}
-</style>
+    html{
+      scroll-behavior:smooth;
+    }
+    :root{
+      --bg:#f4f5f7;
+      --card:#ffffff;
+      --text:#1f2937;
+      --primary:#7c3aed;
+      --secondary:#06b6d4;
+      --border:#e5e7eb;
+    }
+    body{
+      display:flex;
+      background:var(--bg);
+      color:var(--text);
+      transition:0.3s;
+    }
+    /* SIDEBAR */
+    .sidebar{
+      width:260px;
+      height:100vh;
+      background:var(--card);
+      position:fixed;
+      left:0;
+      top:0;
+      padding:25px;
+      overflow-y:auto;
+      border-right:1px solid var(--border);
+    }
+    .logo{
+      font-size:30px;
+      font-weight:bold;
+      margin-bottom:35px;
+      color:var(--primary);
+    }
+    .menu-title{
+      font-size:13px;
+      text-transform:uppercase;
+      color:gray;
+      margin-bottom:10px;
+      margin-top:20px;
+      letter-spacing:1px;
+    }
+    .sidebar a{
+      display:block;
+      text-decoration:none;
+      color:var(--text);
+      padding:14px;
+      margin-bottom:10px;
+      border-radius:12px;
+      transition:0.3s;
+      font-weight:600;
+    }
+    .sidebar a:hover{
+      background:#f3f4f6;
+      color:var(--primary);
+    }
+    /* MAIN */
+    .main{
+      margin-left:260px;
+      width:100%;
+      padding:35px;
+    }
+    /* HEADER */
+    header{
+      background:linear-gradient(135deg, var(--primary), var(--secondary));
+      color:white;
+      padding:60px;
+      border-radius:25px;
+      margin-bottom:40px;
+    }
+    header h1{
+      font-size:52px;
+      margin-bottom:15px;
+    }
+    header p{
+      font-size:20px;
+    }
+    /* SEARCH */
+    .search-bar{
+      width:100%;
+      padding:16px;
+      border:none;
+      border-radius:15px;
+      margin-top:25px;
+      font-size:16px;
+    }
+    /* CART */
+    .cart-box{
+      position:fixed;
+      right:20px;
+      top:20px;
+      width:300px;
+      background:var(--card);
+      border-radius:20px;
+      padding:20px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.08);
+      z-index:1000;
+    }
+    .cart-box h3{
+      margin-bottom:15px;
+      color:var(--primary);
+    }
+    .cart-items{
+      max-height:260px;
+      overflow-y:auto;
+      margin-bottom:15px;
+    }
+    .cart-item{
+      background:var(--bg);
+      padding:12px;
+      border-radius:12px;
+      margin-bottom:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .remove-btn{
+      background:red;
+      color:white;
+      border:none;
+      padding:6px 10px;
+      border-radius:8px;
+      cursor:pointer;
+    }
+    .cart-total{
+      font-weight:bold;
+      margin-bottom:15px;
+    }
+    .checkout-btn{
+      width:100%;
+      background:var(--primary);
+      color:white;
+      border:none;
+      padding:14px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+    /* SECTION */
+    .section-title{
+      font-size:34px;
+      margin-top:50px;
+      margin-bottom:25px;
+    }
+    .products{
+      display:grid;
+      grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+      gap:25px;
+    }
+    /* PRODUCT CARD */
+    .product-card{
+      background:var(--card);
+      border-radius:22px;
+      overflow:hidden;
+      box-shadow:0 10px 30px rgba(0,0,0,0.06);
+      transition:0.3s;
+    }
+    .product-card:hover{
+      transform: translateY(-6px) scale(1.02);
+    }
+    .product-card img{
+      width:100%;
+      height:220px;
+      object-fit:cover;
+    }
+    .product-content{
+      padding:20px;
+    }
+    .product-content h3{
+      margin-bottom:10px;
+      font-size:22px;
+    }
+    .price{
+      color:var(--primary);
+      font-size:24px;
+      font-weight:bold;
+      margin-bottom:12px;
+    }
+    .btn{
+      background:var(--primary);
+      color:white;
+      border:none;
+      padding:12px 18px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:bold;
+      transition:0.3s;
+    }
+    .btn:hover{
+      opacity:0.9;
+    }
+    /* SETTINGS */
+    .theme-buttons{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:20px;
+    }
+    .theme-btn{
+      border:none;
+      padding:12px 18px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+    /* CONTACT */
+    .contact-section{
+      background:var(--card);
+      padding:35px;
+      border-radius:25px;
+      margin-top:60px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.06);
+    }
+    .contact-info p{
+      margin-bottom:15px;
+      font-size:18px;
+    }
+    /* MODAL */
+    .modal{
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:rgba(0,0,0,0.5);
+      display:none;
+      justify-content:center;
+      align-items:center;
+      z-index:2000;
+    }
+    .modal-content{
+      background:var(--card);
+      padding:30px;
+      border-radius:20px;
+      width:90%;
+      max-width:500px;
+    }
+    .modal-content h2{
+      margin-bottom:20px;
+    }
+    .modal-content input{
+      width:100%;
+      padding:14px;
+      margin-bottom:15px;
+      border-radius:10px;
+      border:1px solid #ccc;
+    }
+    /* FOOTER */
+    footer{
+      text-align:center;
+      margin-top:50px;
+      padding-bottom:30px;
+      color:gray;
+    }
+    /* MOBILE */
+    @media(max-width:900px){
+      body{
+        flex-direction:column;
+      }
+      .sidebar{
+        position:relative;
+        width:100%;
+        height:auto;
+      }
+      .main{
+        margin-left:0;
+      }
+      .cart-box{
+        position:relative;
+        width:100%;
+        right:0;
+        top:0;
+        margin-bottom:20px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<header>
-    <h1>🍪 The Cookie Factory</h1>
-    <p>Freshly Baked Cookies Delivered to Your Door</p>
-</header>
+  <div class="sidebar">
+    <div class="logo">StudyHub</div>
+    <div class="menu-title">Navigation</div>
+    <a href="#home">Home</a>
+    <a href="#writing">Writing Tools</a>
+    <a href="#notebooks">Notebooks</a>
+    <a href="#art">Art Supplies</a>
+    <a href="#office">Office Essentials</a>
+    <a href="#tech">Productivity Tech</a>
+    <a href="#settings">Theme Settings</a>
+    <a href="#contact">Contact Us</a>
+  </div>
 
-<div class="container">
-
-    <!-- User Status -->
-    <div class="card">
-        <h2>Account</h2>
-        <div id="userInfo">Not Logged In</div>
-        <br>
-        <button id="logoutBtn" class="hidden">Logout</button>
+  <div class="main">
+    <div class="cart-box">
+      <h3>Shopping Cart</h3>
+      <div id="cartItems" class="cart-items">Cart is empty</div>
+      <div class="cart-total">
+        Total: $<span id="cartTotal">0.00</span>
+      </div>
+      <button class="checkout-btn" onclick="openCheckout()">Checkout</button>
     </div>
 
-    <!-- Authentication -->
-    <div class="auth-grid">
+    <header id="home">
+      <h1>StudyHub Store</h1>
+      <p>Modern tools for productive students</p>
+      <input type="text" id="searchInput" class="search-bar" placeholder="Search products..." onkeyup="searchProducts()">
+    </header>
 
-        <div class="card">
-            <h2>Sign Up</h2>
-            <input type="email" id="signupEmail" placeholder="Email">
-            <input type="password" id="signupPassword" placeholder="Password">
-            <button onclick="signup()">Create Account</button>
-        </div>
+    <div id="productSections">Loading shop elements...</div>
 
-        <div class="card">
-            <h2>Login</h2>
-            <input type="email" id="loginEmail" placeholder="Email">
-            <input type="password" id="loginPassword" placeholder="Password">
-            <button onclick="login()">Login</button>
-        </div>
+    <section id="settings">
+      <h2 class="section-title">Theme Settings</h2>
+      <div class="theme-buttons">
+        <button class="theme-btn" onclick="setTheme('default')">Default</button>
+        <button class="theme-btn" onclick="setTheme('dark')">Dark</button>
+        <button class="theme-btn" onclick="setTheme('blue')">Blue</button>
+        <button class="theme-btn" onclick="setTheme('green')">Green</button>
+        <button class="theme-btn" onclick="setTheme('pink')">Pink</button>
+      </div>
+    </section>
 
+    <section class="contact-section" id="contact">
+      <h2 class="section-title">Contact Us</h2>
+      <div class="contact-info">
+        <p>Email: support@studyhub.com</p>
+        <p>Phone: +1 234 567 890</p>
+        <p>Address: 25 Modern Student Avenue</p>
+        <p>Hours: Monday - Friday 9AM - 6PM</p>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2026 StudyHub Store</p>
+    </footer>
+  </div>
+
+  <div class="modal" id="checkoutModal">
+    <div class="modal-content">
+      <h2>Checkout</h2>
+      <input type="text" id="customerName" placeholder="Full Name">
+      <input type="email" id="customerEmail" placeholder="Email Address">
+      <input type="text" id="customerAddress" placeholder="Shipping Address">
+      <button class="btn" onclick="completeCheckout()">Complete Purchase</button>
+      <br><br>
+      <button class="btn" onclick="closeCheckout()">Cancel</button>
     </div>
+  </div>
 
-    <!-- Products -->
-    <div class="card">
-        <h2>Cookies Menu</h2>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        <div class="products">
+    // Your authentic database keys injected cleanly
+    const firebaseConfig = {
+      apiKey: "AIzaSyBk4oHd6qcwHsEAtOCMD2AtVGm1nG1JPds",
+      authDomain: "onlinestore-542e0.firebaseapp.com",
+      projectId: "onlinestore-542e0",
+      storageBucket: "onlinestore-542e0.firebasestorage.app",
+      messagingSenderId: "284880055855",
+      appId: "1:284880055855:web:098e018e2279d4fede60da",
+      measurementId: "G-HZZGP59EEK"
+    };
 
-            <div class="product"><h3>Chocolate Chip Cookies</h3><p>Classic cookie with melted chocolate chips.</p><div class="price">$8</div></div>
-            <div class="product"><h3>Sugar Cookies</h3><p>Buttery and sweet, perfect for decorating.</p><div class="price">$7</div></div>
-            <div class="product"><h3>Oatmeal Cookies</h3><p>Chewy cookies with raisins or chocolate chips.</p><div class="price">$8</div></div>
-            <div class="product"><h3>Peanut Butter Cookies</h3><p>Rich nutty flavor with soft texture.</p><div class="price">$8</div></div>
-            <div class="product"><h3>Snickerdoodles</h3><p>Soft cookies rolled in cinnamon sugar.</p><div class="price">$8</div></div>
-            <div class="product"><h3>Shortbread</h3><p>Buttery Scottish classic that melts in your mouth.</p><div class="price">$9</div></div>
-            <div class="product"><h3>Biscotti</h3><p>Crunchy Italian cookies for coffee dipping.</p><div class="price">$10</div></div>
-            <div class="product"><h3>Gingerbread Cookies</h3><p>Spiced holiday cookies in fun shapes.</p><div class="price">$9</div></div>
-            <div class="product"><h3>Macarons</h3><p>Delicate French sandwich cookies.</p><div class="price">$12</div></div>
-            <div class="product"><h3>Coconut Macaroons</h3><p>Chewy coconut-based sweet cookies.</p><div class="price">$9</div></div>
-            <div class="product"><h3>Thumbprint Cookies</h3><p>Jam-filled butter cookies.</p><div class="price">$8</div></div>
-            <div class="product"><h3>Crinkle Cookies</h3><p>Fudgy cookies with powdered sugar cracks.</p><div class="price">$9</div></div>
-            <div class="product"><h3>Chocolate Brownie Cookies</h3><p>Fudgy brownie-style cookies.</p><div class="price">$10</div></div>
-            <div class="product"><h3>Peanut Butter Blossoms</h3><p>Peanut butter cookie topped with chocolate kiss.</p><div class="price">$9</div></div>
-            <div class="product"><h3>Linzer Cookies</h3><p>Jam-filled Austrian sandwich cookies.</p><div class="price">$11</div></div>
-            <div class="product"><h3>White Chocolate Macadamia</h3><p>Sweet white chocolate with crunchy nuts.</p><div class="price">$12</div></div>
-            <div class="product"><h3>Alfajores</h3><p>South American dulce de leche sandwich cookies.</p><div class="price">$10</div></div>
-            <div class="product"><h3>Black and White Cookies</h3><p>Cake-like cookies with dual frosting.</p><div class="price">$9</div></div>
-            <div class="product"><h3>Fortune Cookies</h3><p>Crisp cookies with hidden messages.</p><div class="price">$6</div></div>
-            <div class="product"><h3>Pinwheel Cookies</h3><p>Swirled chocolate and vanilla dough cookies.</p><div class="price">$9</div></div>
+    // Initialize Connection instances
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        </div>
-    </div>
+    let categories = [];
 
-    <!-- Order Form -->
-    <div class="card">
-        <h2>Place Order</h2>
-
-        <input type="text" id="customerName" placeholder="Customer Name">
-
-        <select id="productName">
-            <option>Chocolate Chip Cookies</option>
-            <option>Sugar Cookies</option>
-            <option>Oatmeal Cookies</option>
-            <option>Peanut Butter Cookies</option>
-            <option>Snickerdoodles</option>
-            <option>Shortbread</option>
-            <option>Biscotti</option>
-            <option>Gingerbread Cookies</option>
-            <option>Macarons</option>
-            <option>Coconut Macaroons</option>
-            <option>Thumbprint Cookies</option>
-            <option>Crinkle Cookies</option>
-            <option>Chocolate Brownie Cookies</option>
-            <option>Peanut Butter Blossoms</option>
-            <option>Linzer Cookies</option>
-            <option>White Chocolate Macadamia</option>
-            <option>Alfajores</option>
-            <option>Black and White Cookies</option>
-            <option>Fortune Cookies</option>
-            <option>Pinwheel Cookies</option>
-        </select>
-
-        <input type="number" id="quantity" placeholder="Quantity" value="1">
-        <input type="number" id="price" placeholder="Price">
-        <textarea id="message" placeholder="Message"></textarea>
-
-        <button onclick="placeOrder()">Submit Order</button>
-    </div>
-
-    <!-- Order History -->
-    <div class="card">
-        <h2>My Order History</h2>
-        <div id="ordersContainer">Login to view your orders.</div>
-    </div>
-
-</div>
-
-<!-- Firebase SDK -->
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-    getAuth,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut,
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-import {
-    getFirestore,
-    collection,
-    addDoc,
-    query,
-    where,
-    getDocs,
-    orderBy
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBk4oHd6qcwHsEAtOCMD2AtVGm1nG1JPds",
-  authDomain: "onlinestore-542e0.firebaseapp.com",
-  projectId: "onlinestore-542e0",
-  storageBucket: "onlinestore-542e0.firebasestorage.app",
-  messagingSenderId: "284880055855",
-  appId: "1:284880055855:web:098e018e2279d4fede60da",
-  measurementId: "G-HZZGP59EEK"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-let currentUser = null;
-
-// SIGNUP
-window.signup = async function(){
-    const email = document.getElementById("signupEmail").value;
-    const password = document.getElementById("signupPassword").value;
-
-    try{
-        await createUserWithEmailAndPassword(auth, email, password);
-        alert("Account created!");
-    }catch(e){
-        alert(e.message);
-    }
-}
-
-// LOGIN
-window.login = async function(){
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
-
-    try{
-        await signInWithEmailAndPassword(auth, email, password);
-        alert("Login successful!");
-    }catch(e){
-        alert(e.message);
-    }
-}
-
-// LOGOUT
-document.getElementById("logoutBtn").addEventListener("click", async ()=>{
-    await signOut(auth);
-    alert("Logged out");
-});
-
-// AUTH STATE
-onAuthStateChanged(auth, async (user)=>{
-    currentUser = user;
-
-    const userInfo = document.getElementById("userInfo");
-    const logoutBtn = document.getElementById("logoutBtn");
-
-    if(user){
-        userInfo.innerHTML = `<div class="user-info">Logged in as: ${user.email}</div>`;
-        logoutBtn.classList.remove("hidden");
-        loadOrders();
-    }else{
-        userInfo.innerHTML = "Not Logged In";
-        logoutBtn.classList.add("hidden");
-        document.getElementById("ordersContainer").innerHTML = "Login to view your orders.";
-    }
-});
-
-// PLACE ORDER
-window.placeOrder = async function(){
-    if(!currentUser){
-        alert("Please login first");
-        return;
-    }
-
-    const customerName = document.getElementById("customerName").value;
-    const productName = document.getElementById("productName").value;
-    const quantity = Number(document.getElementById("quantity").value);
-    const price = Number(document.getElementById("price").value);
-    const message = document.getElementById("message").value;
-
-    try{
-        await addDoc(collection(db,"orders"),{
-            userId: currentUser.uid,
-            userEmail: currentUser.email,
-            customerName,
-            productName,
-            quantity,
-            price,
-            message,
-            orderDate: new Date()
+    // Attempt retrieval sequence from your Cloud DB Firestore instance
+    async function loadProductsFromFirebase() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "categories"));
+        const fetchedCategories = [];
+        
+        querySnapshot.forEach((doc) => {
+          fetchedCategories.push({ id: doc.id, ...doc.data() });
         });
 
-        alert("Order placed!");
-        loadOrders();
-
-    }catch(e){
-        alert(e.message);
-    }
-}
-
-// LOAD ORDERS
-async function loadOrders(){
-    if(!currentUser) return;
-
-    const container = document.getElementById("ordersContainer");
-    container.innerHTML = "Loading...";
-
-    try{
-        const q = query(
-            collection(db,"orders"),
-            where("userId","==",currentUser.uid),
-            orderBy("orderDate","desc")
-        );
-
-        const snapshot = await getDocs(q);
-
-        if(snapshot.empty){
-            container.innerHTML = "No orders yet.";
-            return;
+        if (fetchedCategories.length === 0) {
+          categories = defaultCategoriesBackup;
+        } else {
+          categories = fetchedCategories;
         }
-
-        let html = "";
-
-        snapshot.forEach(doc=>{
-            const o = doc.data();
-            html += `
-                <div class="order-item">
-                    <strong>${o.productName}</strong><br>
-                    Customer: ${o.customerName}<br>
-                    Quantity: ${o.quantity}<br>
-                    Price: $${o.price}<br>
-                    Message: ${o.message || "-"}<br>
-                    Date: ${o.orderDate?.toDate ? o.orderDate.toDate().toLocaleString() : ""}
-                </div>
-            `;
-        });
-
-        container.innerHTML = html;
-
-    }catch(e){
-        container.innerHTML = e.message;
+      } catch (error) {
+        console.warn("Database lookup defaulted to hardcoded components:", error);
+        categories = defaultCategoriesBackup;
+      }
+      renderProducts();
     }
-}
 
-</script>
+    // Default backup to prevent an empty screen while your collection is building
+    const defaultCategoriesBackup = [
+      { id:"writing", title:"Writing Tools", products:[
+        { name:"Premium Pen Set", price:12, image:"https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?q=80&w=1000&auto=format&fit=crop" },
+        { name:"Marker Collection", price:18, image:"https://images.unsplash.com/photo-1517842645767-c639042777db?q=80&w=1000&auto=format&fit=crop" }
+      ]},
+      { id:"notebooks", title:"Notebooks", products:[
+        { name:"Smart Notebook", price:22, image:"https://images.unsplash.com/photo-1531346878377-a5be20888e57?q=80&w=1000&auto=format&fit=crop" }
+      ]},
+      { id:"art", title:"Art Supplies", products:[
+        { name:"Watercolor Kit", price:30, image:"https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?q=80&w=1000&auto=format&fit=crop" }
+      ]},
+      { id:"office", title:"Office Essentials", products:[
+        { name:"Desk Organizer", price:35, image:"https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?q=80&w=1000&auto=format&fit=crop" }
+      ]},
+      { id:"tech", title:"Productivity Tech", products:[
+        { name:"Student Laptop", price:799, image:"https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=1000&auto=format&fit=crop" },
+        { name:"Wireless Headphones", price:89, image:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop" },
+        { name:"Mechanical Keyboard", price:120, image:"https://images.unsplash.com/photo-1517336714739-489689fd1ca8?q=80&w=1000&auto=format&fit=crop" }
+      ]}
+    ];
+
+    /* RENDER PRODUCTS */
+    const productSections = document.getElementById("productSections");
+
+    window.renderProducts = function(filter="") {
+      productSections.innerHTML = "";
+      categories.forEach((category)=>{
+        let categoryHTML = "";
+        category.products.forEach((product)=>{
+          if(product.name.toLowerCase().includes(filter.toLowerCase())){
+            categoryHTML += `
+              <div class="product-card">
+                <img src="${product.image}" loading="lazy" alt="${product.name}">
+                <div class="product-content">
+                  <h3>${product.name}</h3>
+                  <p class="price">$${product.price}</p>
+                  <button class="btn" onclick='addToCart("${product.name}", ${product.price})'>Add To Cart</button>
+                </div>
+              </div>
+            `;
+          }
+        });
+        if(categoryHTML !== ""){
+          productSections.innerHTML += `
+            <section id="${category.id}">
+              <h2 class="section-title">${category.title}</h2>
+              <div class="products">${categoryHTML}</div>
+            </section>
+          `;
+        }
+      });
+    }
+
+    /* SEARCH */
+    window.searchProducts = function() {
+      const search = document.getElementById("searchInput").value;
+      renderProducts(search);
+    }
+
+    /* CART */
+    let cart = [];
+
+    window.addToCart = function(name, price) {
+      const existing = cart.find(item => item.name === name);
+      if(existing){
+        existing.quantity++;
+      } else {
+        cart.push({ name: name, price: price, quantity: 1 });
+      }
+      updateCart();
+    }
+
+    window.removeItem = function(index) {
+      cart.splice(index, 1);
+      updateCart();
+    }
+
+    function updateCart() {
+      const cartItems = document.getElementById("cartItems");
+      const cartTotal = document.getElementById("cartTotal");
+      cartItems.innerHTML = "";
+
+      if(cart.length === 0){
+        cartItems.innerHTML = "Cart is empty";
+        cartTotal.innerHTML = "0.00";
+        return;
+      }
+
+      let total = 0;
+      cart.forEach((item, index)=>{
+        total += item.price * item.quantity;
+        cartItems.innerHTML += `
+          <div class="cart-item">
+            <div>
+              <strong>${item.name}</strong><br>
+              Qty: ${item.quantity}<br>
+              $${(item.price * item.quantity).toFixed(2)}
+            </div>
+            <button class="remove-btn" onclick="removeItem(${index})">X</button>
+          </div>
+        `;
+      });
+      cartTotal.innerHTML = total.toFixed(2);
+    }
+
+    /* CHECKOUT */
+    window.openCheckout = function() {
+      if(cart.length === 0){
+        alert("Your cart is empty");
+        return;
+      }
+      document.getElementById("checkoutModal").style.display = "flex";
+    }
+
+    window.closeCheckout = function() {
+      document.getElementById("checkoutModal").style.display = "none";
+    }
+
+    window.completeCheckout = async function() {
+      const name = document.getElementById("customerName").value;
+      const email = document.getElementById("customerEmail").value;
+      const address = document.getElementById("customerAddress").value;
+
+      if(name === "" || email === "" || address === ""){
+        alert("Please fill all fields");
+        return;
+      }
+
+      const finalTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+      try {
+        // Automatically injects new purchases straight into your Firestore orders database collection
+        await addDoc(collection(db, "orders"), {
+          customerName: name,
+          customerEmail: email,
+          shippingAddress: address,
+          itemsOrdered: cart,
+          orderTotal: finalTotal,
+          timestamp: new Date()
+        });
+        
+        alert("Thank you for your purchase, " + name + "! Your order was saved to Firebase.");
+      } catch (e) {
+        console.error("Firebase tracking encountered an issue: ", e);
+        alert("Order validation fell back to default handler runtime process.");
+      }
+
+      cart = [];
+      updateCart();
+      closeCheckout();
+    }
+
+    /* THEMES */
+    window.setTheme = function(theme) {
+      if(theme === "default"){
+        document.documentElement.style.setProperty('--bg', '#f4f5f7');
+        document.documentElement.style.setProperty('--card', '#ffffff');
+        document.documentElement.style.setProperty('--text', '#1f2937');
+      }
+      else if(theme === "dark"){
+        document.documentElement.style.setProperty('--bg', '#111827');
+        document.documentElement.style.setProperty('--card', '#1f2937');
+        document.documentElement.style.setProperty('--text', '#ffffff');
+      }
+      else if(theme === "blue"){
+        document.documentElement.style.setProperty('--bg', '#dbeafe');
+        document.documentElement.style.setProperty('--card', '#ffffff');
+        document.documentElement.style.setProperty('--text', '#1e3a8a');
+      }
+      else if(theme === "green"){
+        document.documentElement.style.setProperty('--bg', '#dcfce7');
+        document.documentElement.style.setProperty('--card', '#ffffff');
+        document.documentElement.style.setProperty('--text', '#14532d');
+      }
+      else if(theme === "pink"){
+        document.documentElement.style.setProperty('--bg', '#fce7f3');
+        document.documentElement.style.setProperty('--card', '#ffffff');
+        document.documentElement.style.setProperty('--text', '#831843');
+      }
+    }
+
+    // Trigger baseline data generation process
+    loadProductsFromFirebase();
+  </script>
 
 </body>
 </html>
