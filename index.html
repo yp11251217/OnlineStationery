@@ -554,15 +554,23 @@
           timestamp: new Date()
         });
 
-        // 2. Dispatch the automated email notification using your specific template keys
+        // 2. Dispatch automated email notification to YOUR inbox
         await emailjs.send("service_ac4x93m", "template_zkxy2if", {
           customerName: name,
           customerEmail: email,
           shippingAddress: address,
           orderTotal: finalTotal.toFixed(2)
         });
+
+        // 3. Dispatch automated confirmation receipt to the CUSTOMER's inbox
+        await emailjs.send("service_ac4x93m", "template_yfyv18b", {
+          customerName: name,
+          customerEmail: email,
+          shippingAddress: address,
+          orderTotal: finalTotal.toFixed(2)
+        });
         
-        alert("Thank you for your purchase, " + name + "! Order saved and email dispatch completed.");
+        alert("Thank you for your purchase, " + name + "! Your order was processed and a confirmation email has been sent.");
       } catch (e) {
         console.error("Process execution error detail: ", e);
         alert("Transaction completed locally.");
