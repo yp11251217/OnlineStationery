@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Online Stationery Store</title>
+<title>The Cookie Factory</title>
 
 <style>
 *{
@@ -14,12 +14,12 @@
 }
 
 body{
-    background:#f4f6f9;
-    color:#333;
+    background:#f4f1ee;
+    color:#3b2f2f;
 }
 
 header{
-    background:#2563eb;
+    background:#8b5e3c;
     color:white;
     padding:20px;
     text-align:center;
@@ -52,7 +52,7 @@ input, textarea, select{
 }
 
 button{
-    background:#2563eb;
+    background:#8b5e3c;
     color:white;
     border:none;
     padding:10px 16px;
@@ -61,7 +61,7 @@ button{
 }
 
 button:hover{
-    background:#1d4ed8;
+    background:#6f472e;
 }
 
 .auth-grid{
@@ -77,7 +77,7 @@ button:hover{
 }
 
 .product{
-    background:white;
+    background:#fffaf5;
     padding:15px;
     border-radius:10px;
     box-shadow:0 2px 8px rgba(0,0,0,0.1);
@@ -88,7 +88,7 @@ button:hover{
 }
 
 .price{
-    color:green;
+    color:#2e7d32;
     font-weight:bold;
     margin:10px 0;
 }
@@ -105,7 +105,7 @@ button:hover{
 .user-info{
     margin-top:10px;
     font-weight:bold;
-    color:#2563eb;
+    color:#8b5e3c;
 }
 
 @media(max-width:768px){
@@ -115,11 +115,12 @@ button:hover{
 }
 </style>
 </head>
+
 <body>
 
 <header>
-    <h1>🛒 Firebase Online Store</h1>
-    <p>Simple Full-Stack Store with Firebase</p>
+    <h1>🍪 The Cookie Factory</h1>
+    <p>Freshly Baked Cookies Delivered to Your Door</p>
 </header>
 
 <div class="container">
@@ -135,23 +136,17 @@ button:hover{
     <!-- Authentication -->
     <div class="auth-grid">
 
-        <!-- Signup -->
         <div class="card">
             <h2>Sign Up</h2>
-
             <input type="email" id="signupEmail" placeholder="Email">
             <input type="password" id="signupPassword" placeholder="Password">
-
             <button onclick="signup()">Create Account</button>
         </div>
 
-        <!-- Login -->
         <div class="card">
             <h2>Login</h2>
-
             <input type="email" id="loginEmail" placeholder="Email">
             <input type="password" id="loginPassword" placeholder="Password">
-
             <button onclick="login()">Login</button>
         </div>
 
@@ -159,33 +154,30 @@ button:hover{
 
     <!-- Products -->
     <div class="card">
-        <h2>Products</h2>
+        <h2>Cookies Menu</h2>
 
         <div class="products">
 
-            <div class="product">
-                <h3>Wireless Mouse</h3>
-                <p>Comfortable and reliable.</p>
-                <div class="price">$25</div>
-            </div>
-
-            <div class="product">
-                <h3>Mechanical Keyboard</h3>
-                <p>Perfect for work and gaming.</p>
-                <div class="price">$75</div>
-            </div>
-
-            <div class="product">
-                <h3>USB Headset</h3>
-                <p>Clear sound and microphone.</p>
-                <div class="price">$40</div>
-            </div>
-
-            <div class="product">
-                <h3>Webcam HD</h3>
-                <p>1080P video quality.</p>
-                <div class="price">$60</div>
-            </div>
+            <div class="product"><h3>Chocolate Chip Cookies</h3><p>Classic cookie with melted chocolate chips.</p><div class="price">$8</div></div>
+            <div class="product"><h3>Sugar Cookies</h3><p>Buttery and sweet, perfect for decorating.</p><div class="price">$7</div></div>
+            <div class="product"><h3>Oatmeal Cookies</h3><p>Chewy cookies with raisins or chocolate chips.</p><div class="price">$8</div></div>
+            <div class="product"><h3>Peanut Butter Cookies</h3><p>Rich nutty flavor with soft texture.</p><div class="price">$8</div></div>
+            <div class="product"><h3>Snickerdoodles</h3><p>Soft cookies rolled in cinnamon sugar.</p><div class="price">$8</div></div>
+            <div class="product"><h3>Shortbread</h3><p>Buttery Scottish classic that melts in your mouth.</p><div class="price">$9</div></div>
+            <div class="product"><h3>Biscotti</h3><p>Crunchy Italian cookies for coffee dipping.</p><div class="price">$10</div></div>
+            <div class="product"><h3>Gingerbread Cookies</h3><p>Spiced holiday cookies in fun shapes.</p><div class="price">$9</div></div>
+            <div class="product"><h3>Macarons</h3><p>Delicate French sandwich cookies.</p><div class="price">$12</div></div>
+            <div class="product"><h3>Coconut Macaroons</h3><p>Chewy coconut-based sweet cookies.</p><div class="price">$9</div></div>
+            <div class="product"><h3>Thumbprint Cookies</h3><p>Jam-filled butter cookies.</p><div class="price">$8</div></div>
+            <div class="product"><h3>Crinkle Cookies</h3><p>Fudgy cookies with powdered sugar cracks.</p><div class="price">$9</div></div>
+            <div class="product"><h3>Chocolate Brownie Cookies</h3><p>Fudgy brownie-style cookies.</p><div class="price">$10</div></div>
+            <div class="product"><h3>Peanut Butter Blossoms</h3><p>Peanut butter cookie topped with chocolate kiss.</p><div class="price">$9</div></div>
+            <div class="product"><h3>Linzer Cookies</h3><p>Jam-filled Austrian sandwich cookies.</p><div class="price">$11</div></div>
+            <div class="product"><h3>White Chocolate Macadamia</h3><p>Sweet white chocolate with crunchy nuts.</p><div class="price">$12</div></div>
+            <div class="product"><h3>Alfajores</h3><p>South American dulce de leche sandwich cookies.</p><div class="price">$10</div></div>
+            <div class="product"><h3>Black and White Cookies</h3><p>Cake-like cookies with dual frosting.</p><div class="price">$9</div></div>
+            <div class="product"><h3>Fortune Cookies</h3><p>Crisp cookies with hidden messages.</p><div class="price">$6</div></div>
+            <div class="product"><h3>Pinwheel Cookies</h3><p>Swirled chocolate and vanilla dough cookies.</p><div class="price">$9</div></div>
 
         </div>
     </div>
@@ -197,16 +189,30 @@ button:hover{
         <input type="text" id="customerName" placeholder="Customer Name">
 
         <select id="productName">
-            <option>Wireless Mouse</option>
-            <option>Mechanical Keyboard</option>
-            <option>USB Headset</option>
-            <option>Webcam HD</option>
+            <option>Chocolate Chip Cookies</option>
+            <option>Sugar Cookies</option>
+            <option>Oatmeal Cookies</option>
+            <option>Peanut Butter Cookies</option>
+            <option>Snickerdoodles</option>
+            <option>Shortbread</option>
+            <option>Biscotti</option>
+            <option>Gingerbread Cookies</option>
+            <option>Macarons</option>
+            <option>Coconut Macaroons</option>
+            <option>Thumbprint Cookies</option>
+            <option>Crinkle Cookies</option>
+            <option>Chocolate Brownie Cookies</option>
+            <option>Peanut Butter Blossoms</option>
+            <option>Linzer Cookies</option>
+            <option>White Chocolate Macadamia</option>
+            <option>Alfajores</option>
+            <option>Black and White Cookies</option>
+            <option>Fortune Cookies</option>
+            <option>Pinwheel Cookies</option>
         </select>
 
         <input type="number" id="quantity" placeholder="Quantity" value="1">
-
         <input type="number" id="price" placeholder="Price">
-
         <textarea id="message" placeholder="Message"></textarea>
 
         <button onclick="placeOrder()">Submit Order</button>
@@ -215,10 +221,7 @@ button:hover{
     <!-- Order History -->
     <div class="card">
         <h2>My Order History</h2>
-
-        <div id="ordersContainer">
-            Login to view your orders.
-        </div>
+        <div id="ordersContainer">Login to view your orders.</div>
     </div>
 
 </div>
@@ -227,7 +230,6 @@ button:hover{
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
 import {
     getAuth,
     createUserWithEmailAndPassword,
@@ -246,12 +248,6 @@ import {
     orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-
-// =======================
-// FIREBASE CONFIG
-// Replace with your own
-// =======================
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyBk4oHd6qcwHsEAtOCMD2AtVGm1nG1JPds",
   authDomain: "onlinestore-542e0.firebaseapp.com",
@@ -268,277 +264,131 @@ const db = getFirestore(app);
 
 let currentUser = null;
 
-
-// =======================
 // SIGNUP
-// =======================
 window.signup = async function(){
-
-    const email =
-        document.getElementById("signupEmail").value;
-
-    const password =
-        document.getElementById("signupPassword").value;
+    const email = document.getElementById("signupEmail").value;
+    const password = document.getElementById("signupPassword").value;
 
     try{
-
-        await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
-
-        alert("Account created successfully!");
-
-    }catch(error){
-        alert(error.message);
+        await createUserWithEmailAndPassword(auth, email, password);
+        alert("Account created!");
+    }catch(e){
+        alert(e.message);
     }
 }
 
-
-// =======================
 // LOGIN
-// =======================
 window.login = async function(){
-
-    const email =
-        document.getElementById("loginEmail").value;
-
-    const password =
-        document.getElementById("loginPassword").value;
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
 
     try{
-
-        await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
-
+        await signInWithEmailAndPassword(auth, email, password);
         alert("Login successful!");
-
-    }catch(error){
-        alert(error.message);
+    }catch(e){
+        alert(e.message);
     }
 }
 
-
-// =======================
 // LOGOUT
-// =======================
-document
-.getElementById("logoutBtn")
-.addEventListener("click", async ()=>{
-
+document.getElementById("logoutBtn").addEventListener("click", async ()=>{
     await signOut(auth);
-
     alert("Logged out");
-
 });
 
-
-// =======================
 // AUTH STATE
-// =======================
-onAuthStateChanged(auth, async(user)=>{
-
+onAuthStateChanged(auth, async (user)=>{
     currentUser = user;
 
-    const userInfo =
-        document.getElementById("userInfo");
-
-    const logoutBtn =
-        document.getElementById("logoutBtn");
+    const userInfo = document.getElementById("userInfo");
+    const logoutBtn = document.getElementById("logoutBtn");
 
     if(user){
-
-        userInfo.innerHTML =
-        `
-        <div class="user-info">
-            Logged in as: ${user.email}
-        </div>
-        `;
-
+        userInfo.innerHTML = `<div class="user-info">Logged in as: ${user.email}</div>`;
         logoutBtn.classList.remove("hidden");
-
         loadOrders();
-
     }else{
-
-        userInfo.innerHTML =
-        "Not Logged In";
-
+        userInfo.innerHTML = "Not Logged In";
         logoutBtn.classList.add("hidden");
-
-        document.getElementById(
-            "ordersContainer"
-        ).innerHTML =
-        "Login to view your orders.";
+        document.getElementById("ordersContainer").innerHTML = "Login to view your orders.";
     }
-
 });
 
-
-// =======================
 // PLACE ORDER
-// =======================
 window.placeOrder = async function(){
-
     if(!currentUser){
-
-        alert(
-            "Please login before placing an order."
-        );
-
+        alert("Please login first");
         return;
     }
 
-    const customerName =
-        document.getElementById("customerName").value;
-
-    const productName =
-        document.getElementById("productName").value;
-
-    const quantity =
-        Number(
-            document.getElementById("quantity").value
-        );
-
-    const price =
-        Number(
-            document.getElementById("price").value
-        );
-
-    const message =
-        document.getElementById("message").value;
+    const customerName = document.getElementById("customerName").value;
+    const productName = document.getElementById("productName").value;
+    const quantity = Number(document.getElementById("quantity").value);
+    const price = Number(document.getElementById("price").value);
+    const message = document.getElementById("message").value;
 
     try{
+        await addDoc(collection(db,"orders"),{
+            userId: currentUser.uid,
+            userEmail: currentUser.email,
+            customerName,
+            productName,
+            quantity,
+            price,
+            message,
+            orderDate: new Date()
+        });
 
-        await addDoc(
-            collection(db,"orders"),
-            {
-                userId: currentUser.uid,
-                userEmail: currentUser.email,
-                customerName,
-                productName,
-                quantity,
-                price,
-                message,
-                orderDate: new Date()
-            }
-        );
-
-        alert("Order placed successfully!");
-
+        alert("Order placed!");
         loadOrders();
 
-    }catch(error){
-
-        alert(error.message);
-
+    }catch(e){
+        alert(e.message);
     }
-
 }
 
-
-// =======================
-// LOAD USER ORDERS
-// =======================
+// LOAD ORDERS
 async function loadOrders(){
-
     if(!currentUser) return;
 
-    const container =
-        document.getElementById(
-            "ordersContainer"
-        );
-
-    container.innerHTML =
-        "Loading orders...";
+    const container = document.getElementById("ordersContainer");
+    container.innerHTML = "Loading...";
 
     try{
-
         const q = query(
             collection(db,"orders"),
-            where(
-                "userId",
-                "==",
-                currentUser.uid
-            ),
-            orderBy(
-                "orderDate",
-                "desc"
-            )
+            where("userId","==",currentUser.uid),
+            orderBy("orderDate","desc")
         );
 
-        const snapshot =
-            await getDocs(q);
+        const snapshot = await getDocs(q);
 
         if(snapshot.empty){
-
-            container.innerHTML =
-            "No orders found.";
-
+            container.innerHTML = "No orders yet.";
             return;
         }
 
         let html = "";
 
         snapshot.forEach(doc=>{
-
-            const order = doc.data();
-
+            const o = doc.data();
             html += `
-            <div class="order-item">
-
-                <strong>
-                    ${order.productName}
-                </strong>
-
-                <br>
-
-                Customer:
-                ${order.customerName}
-
-                <br>
-
-                Quantity:
-                ${order.quantity}
-
-                <br>
-
-                Price:
-                $${order.price}
-
-                <br>
-
-                Message:
-                ${order.message || "-"}
-
-                <br>
-
-                Date:
-                ${
-                    order.orderDate?.toDate
-                    ? order.orderDate
-                        .toDate()
-                        .toLocaleString()
-                    : ""
-                }
-
-            </div>
+                <div class="order-item">
+                    <strong>${o.productName}</strong><br>
+                    Customer: ${o.customerName}<br>
+                    Quantity: ${o.quantity}<br>
+                    Price: $${o.price}<br>
+                    Message: ${o.message || "-"}<br>
+                    Date: ${o.orderDate?.toDate ? o.orderDate.toDate().toLocaleString() : ""}
+                </div>
             `;
         });
 
         container.innerHTML = html;
 
-    }catch(error){
-
-        container.innerHTML =
-        error.message;
-
+    }catch(e){
+        container.innerHTML = e.message;
     }
-
 }
 
 </script>
