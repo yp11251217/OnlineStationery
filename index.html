@@ -65,6 +65,7 @@
       border-radius:12px;
       transition:0.3s;
       font-weight:600;
+      cursor: pointer;
     }
     .sidebar a:hover{
       background:#f3f4f6;
@@ -99,6 +100,7 @@
       border-radius:15px;
       margin-top:25px;
       font-size:16px;
+      color: #1f2937;
     }
     /* CART */
     .cart-box{
@@ -111,13 +113,14 @@
       padding:20px;
       box-shadow:0 10px 30px rgba(0,0,0,0.08);
       z-index:1000;
+      border: 1px solid var(--border);
     }
     .cart-box h3{
       margin-bottom:15px;
       color:var(--primary);
     }
     .cart-items{
-      max-height:260px;
+      max-height:200px;
       overflow-y:auto;
       margin-bottom:15px;
     }
@@ -171,6 +174,7 @@
       overflow:hidden;
       box-shadow:0 10px 30px rgba(0,0,0,0.06);
       transition:0.3s;
+      border: 1px solid var(--border);
     }
     .product-card:hover{
       transform: translateY(-6px) scale(1.02);
@@ -214,11 +218,28 @@
       margin-top:20px;
     }
     .theme-btn{
-      border:none;
+      border:1px solid var(--border);
       padding:12px 18px;
       border-radius:12px;
       cursor:pointer;
       font-weight:bold;
+      background: var(--card);
+      color: var(--text);
+    }
+    /* ORDER HISTORY */
+    .history-container {
+      background: var(--card);
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+    }
+    .order-block {
+      border-bottom: 1px solid var(--border);
+      padding: 15px 0;
+    }
+    .order-block:last-child {
+      border-bottom: none;
     }
     /* CONTACT */
     .contact-section{
@@ -227,6 +248,7 @@
       border-radius:25px;
       margin-top:60px;
       box-shadow:0 10px 30px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
     }
     .contact-info p{
       margin-bottom:15px;
@@ -251,6 +273,7 @@
       border-radius:20px;
       width:90%;
       max-width:500px;
+      border: 1px solid var(--border);
     }
     .modal-content h2{
       margin-bottom:20px;
@@ -260,7 +283,17 @@
       padding:14px;
       margin-bottom:15px;
       border-radius:10px;
-      border:1px solid #ccc;
+      border:1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+    }
+    .modal-link {
+      color: var(--primary);
+      cursor: pointer;
+      display: block;
+      margin: 10px 0;
+      text-decoration: underline;
+      font-size: 14px;
     }
     /* FOOTER */
     footer{
@@ -278,6 +311,8 @@
         position:relative;
         width:100%;
         height:auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
       }
       .main{
         margin-left:0;
@@ -299,6 +334,12 @@
 
   <div class="sidebar">
     <div class="logo">StudyHub</div>
+    
+    <div class="menu-title">Account</div>
+    <span id="userStatus" style="padding: 14px; font-weight: bold; display: block; font-size: 14px;">Loading profile...</span>
+    <a id="authLink" onclick="openAuthModal()">Login / Register</a>
+    <a id="historyLink" href="#history" style="display:none;">My Order History</a>
+
     <div class="menu-title">Navigation</div>
     <a href="#home">Home</a>
     <a href="#writing">Writing Tools</a>
@@ -328,6 +369,11 @@
 
     <div id="productSections">Loading shop elements...</div>
 
+    <section id="history" style="display: none; margin-top: 50px;">
+      <h2 class="section-title">Your Order History</h2>
+      <div id="historyContent" class="history-container">Please login to view your orders.</div>
+    </section>
+
     <section id="settings">
       <h2 class="section-title">Theme Settings</h2>
       <div class="theme-buttons">
@@ -354,11 +400,16 @@
     </footer>
   </div>
 
+  <div class="modal" id="authModal">
+    <div class="modal-content" id="authContentMode">
+      </div>
+  </div>
+
   <div class="modal" id="checkoutModal">
     <div class="modal-content">
       <h2>Checkout</h2>
       <input type="text" id="customerName" placeholder="Full Name">
-      <input type="email" id="customerEmail" placeholder="Email Address">
+      <input type="email" id="customerEmail" placeholder="Email Address" disabled>
       <input type="text" id="customerAddress" placeholder="Shipping Address">
       <button class="btn" onclick="completeCheckout()">Complete Purchase</button>
       <br><br>
@@ -368,14 +419,15 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, addDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // 1. Initialize EmailJS with your Public Key
+    // 1. Initialize EmailJS
     emailjs.init({
       publicKey: "MfuY9QAtvgIlEE6-C", 
     });
 
-    // 2. Initialize Firebase with your explicit keys
+    // 2. Initialize Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBk4oHd6qcwHsEAtOCMD2AtVGm1nG1JPds",
       authDomain: "onlinestore-542e0.firebaseapp.com",
@@ -388,30 +440,10 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
     let categories = [];
-
-    // Fetch live inventory items from Cloud Firestore
-    async function loadProductsFromFirebase() {
-      try {
-        const querySnapshot = await getDocs(collection(db, "categories"));
-        const fetchedCategories = [];
-        
-        querySnapshot.forEach((doc) => {
-          fetchedCategories.push({ id: doc.id, ...doc.data() });
-        });
-
-        if (fetchedCategories.length === 0) {
-          categories = defaultCategoriesBackup;
-        } else {
-          categories = fetchedCategories;
-        }
-      } catch (error) {
-        console.warn("Database lookup returned empty, loading defaults:", error);
-        categories = defaultCategoriesBackup;
-      }
-      renderProducts();
-    }
+    let currentUser = null;
 
     const defaultCategoriesBackup = [
       { id:"writing", title:"Writing Tools", products:[
@@ -434,8 +466,136 @@
       ]}
     ];
 
-    /* RENDER PRODUCTS */
-    const productSections = document.getElementById("productSections");
+    // Auth Change Tracking Dashboard Status UI updates
+    onAuthStateChanged(auth, (user) => {
+      const userStatus = document.getElementById("userStatus");
+      const authLink = document.getElementById("authLink");
+      const historyLink = document.getElementById("historyLink");
+      const historySection = document.getElementById("history");
+
+      if (user) {
+        currentUser = user;
+        userStatus.innerText = `Logged in: ${user.email}`;
+        authLink.innerText = "Logout";
+        authLink.setAttribute("onclick", "handleLogout()");
+        historyLink.style.display = "block";
+        historySection.style.display = "block";
+        loadOrderHistory(user.uid);
+      } else {
+        currentUser = null;
+        userStatus.innerText = "Guest Mode";
+        authLink.innerText = "Login / Register";
+        authLink.setAttribute("onclick", "openAuthModal()");
+        historyLink.style.display = "none";
+        historySection.style.display = "none";
+        document.getElementById("historyContent").innerHTML = "Please login to view your orders.";
+      }
+    });
+
+    /* AUTHENTICATION CONTROLLERS */
+    window.openAuthModal = function(view = 'login') {
+      const container = document.getElementById("authContentMode");
+      document.getElementById("authModal").style.display = "flex";
+
+      if(view === 'login') {
+        container.innerHTML = `
+          <h2>Login</h2>
+          <input type="email" id="authEmail" placeholder="Email Address">
+          <input type="password" id="authPassword" placeholder="Password">
+          <button class="btn" onclick="processLogin()">Sign In</button>
+          <span class="modal-link" onclick="openAuthModal('register')">Don't have an account? Register here</span>
+          <span class="modal-link" onclick="openAuthModal('forgot')">Forgot Password?</span>
+          <br><button class="btn" style="background:gray;" onclick="closeAuthModal()">Cancel</button>
+        `;
+      } else if (view === 'register') {
+        container.innerHTML = `
+          <h2>Register Account</h2>
+          <input type="email" id="authEmail" placeholder="Email Address">
+          <input type="password" id="authPassword" placeholder="Password">
+          <button class="btn" onclick="processRegister()">Create Account</button>
+          <span class="modal-link" onclick="openAuthModal('login')">Already have an account? Login</span>
+          <br><button class="btn" style="background:gray;" onclick="closeAuthModal()">Cancel</button>
+        `;
+      } else if (view === 'forgot') {
+        container.innerHTML = `
+          <h2>Reset Password</h2>
+          <p style="margin-bottom:15px; font-size:14px; color:gray;">Enter your email and we'll send you a secure link to reset your password.</p>
+          <input type="email" id="authEmail" placeholder="Email Address">
+          <button class="btn" onclick="processPasswordReset()">Send Reset Link</button>
+          <span class="modal-link" onclick="openAuthModal('login')">Back to login</span>
+          <br><button class="btn" style="background:gray;" onclick="closeAuthModal()">Cancel</button>
+        `;
+      }
+    }
+
+    window.closeAuthModal = function() {
+      document.getElementById("authModal").style.display = "none";
+    }
+
+    window.processLogin = async function() {
+      const email = document.getElementById("authEmail").value;
+      const pass = document.getElementById("authPassword").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        alert("Logged in successfully!");
+        closeAuthModal();
+      } catch (err) {
+        alert("Error logging in: " + err.message);
+      }
+    }
+
+    window.processRegister = async function() {
+      const email = document.getElementById("authEmail").value;
+      const pass = document.getElementById("authPassword").value;
+      try {
+        await createUserWithEmailAndPassword(auth, email, pass);
+        alert("Account registered successfully!");
+        closeAuthModal();
+      } catch (err) {
+        alert("Error creating profile: " + err.message);
+      }
+    }
+
+    window.processPasswordReset = async function() {
+      const email = document.getElementById("authEmail").value;
+      if(!email) { alert("Please provide your email address."); return; }
+      try {
+        await sendPasswordResetEmail(auth, email);
+        alert("Password reset email dispatched to inbox!");
+        openAuthModal('login');
+      } catch(err) {
+        alert("Failed to issue link: " + err.message);
+      }
+    }
+
+    window.handleLogout = async function() {
+      if(confirm("Confirm logging out of StudyHub profile?")) {
+        await signOut(auth);
+        alert("Logged out successfully.");
+      }
+    }
+
+    /* PRODUCTS MANAGEMENT */
+    async function loadProductsFromFirebase() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "categories"));
+        const fetchedCategories = [];
+        
+        querySnapshot.forEach((doc) => {
+          fetchedCategories.push({ id: doc.id, ...doc.data() });
+        });
+
+        if (fetchedCategories.length === 0) {
+          categories = defaultCategoriesBackup;
+        } else {
+          categories = fetchedCategories;
+        }
+      } catch (error) {
+        console.warn("Database lookup returned empty, loading defaults:", error);
+        categories = defaultCategoriesBackup;
+      }
+      window.renderProducts();
+    }
 
     window.renderProducts = function(filter="") {
       productSections.innerHTML = "";
@@ -449,7 +609,7 @@
                 <div class="product-content">
                   <h3>${product.name}</h3>
                   <p class="price">$${product.price}</p>
-                  <button class="btn" onclick='addToCart("${product.name}", ${product.price})'>Add To Cart</button>
+                  <button class="btn" onclick='addToCart("${product.name.replace(/'/g, "\\'")}", ${product.price})'>Add To Cart</button>
                 </div>
               </div>
             `;
@@ -466,13 +626,12 @@
       });
     }
 
-    /* SEARCH */
     window.searchProducts = function() {
       const search = document.getElementById("searchInput").value;
-      renderProducts(search);
+      window.renderProducts(search);
     }
 
-    /* CART */
+    /* CART SYNCING */
     let cart = [];
 
     window.addToCart = function(name, price) {
@@ -518,12 +677,20 @@
       cartTotal.innerHTML = total.toFixed(2);
     }
 
-    /* CHECKOUT */
+    /* STRATEGIC GATEKEEPER CHECKOUT */
     window.openCheckout = function() {
       if(cart.length === 0){
         alert("Your cart is empty");
         return;
       }
+      if(!currentUser) {
+        alert("Authentication required. Please log in or create an account to process your purchase order.");
+        openAuthModal('login');
+        return;
+      }
+      
+      // Auto-populate the disabled email from the authenticated user context
+      document.getElementById("customerEmail").value = currentUser.email;
       document.getElementById("checkoutModal").style.display = "flex";
     }
 
@@ -533,19 +700,21 @@
 
     window.completeCheckout = async function() {
       const name = document.getElementById("customerName").value;
-      const email = document.getElementById("customerEmail").value;
+      const email = currentUser.email; // Pull explicitly from Auth Object
       const address = document.getElementById("customerAddress").value;
 
-      if(name === "" || email === "" || address === ""){
-        alert("Please fill all fields");
+      if(name === "" || address === ""){
+        alert("Please complete the required form elements.");
         return;
       }
 
       const finalTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+      const itemsSummaryString = cart.map(i => `${i.name} (x${i.quantity})`).join(", ");
 
       try {
-        // 1. Save data permanently to your Firebase cloud dashboard
+        // 1. Write permanent order record bound to Auth Profile UID 
         await addDoc(collection(db, "orders"), {
+          userId: currentUser.uid, 
           customerName: name,
           customerEmail: email,
           shippingAddress: address,
@@ -554,31 +723,74 @@
           timestamp: new Date()
         });
 
-        // 2. Dispatch automated email notification to YOUR inbox
+        // 2. Dispatch notification email to store admin via EmailJS
         await emailjs.send("service_ac4x93m", "template_zkxy2if", {
           customerName: name,
           customerEmail: email,
           shippingAddress: address,
-          orderTotal: finalTotal.toFixed(2)
+          orderTotal: finalTotal.toFixed(2),
+          items: itemsSummaryString
         });
 
-        // 3. Dispatch automated confirmation receipt to the CUSTOMER's inbox
+        // 3. Dispatch automated confirmation receipt to customer inbox via EmailJS
         await emailjs.send("service_ac4x93m", "template_yfyv18b", {
           customerName: name,
           customerEmail: email,
           shippingAddress: address,
-          orderTotal: finalTotal.toFixed(2)
+          orderTotal: finalTotal.toFixed(2),
+          items: itemsSummaryString
         });
         
         alert("Thank you for your purchase, " + name + "! Your order was processed and a confirmation email has been sent.");
+        
+        // Refresh orders locally
+        loadOrderHistory(currentUser.uid);
       } catch (e) {
-        console.error("Process execution error detail: ", e);
+        console.error("Execution profile error: ", e);
         alert("Transaction completed locally.");
       }
 
       cart = [];
       updateCart();
-      closeCheckout();
+      window.closeCheckout();
+    }
+
+    /* FETCH ORDER HISTORY */
+    async function loadOrderHistory(uid) {
+      const target = document.getElementById("historyContent");
+      try {
+        // Query to match current authenticated UID
+        const q = query(collection(db, "orders"), where("userId", "==", uid));
+        const querySnapshot = await getDocs(q);
+        
+        let blocksHTML = "";
+        
+        // Sort items chronologically local side to prevent setup indexing issues instantly
+        const sortedDocs = [];
+        querySnapshot.forEach((doc) => {
+          sortedDocs.push(doc.data());
+        });
+        sortedDocs.sort((a,b) => b.timestamp?.seconds - a.timestamp?.seconds);
+
+        sortedDocs.forEach((order) => {
+          const dateStr = order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleDateString() : "Recent";
+          const itemsLine = order.itemsOrdered.map(i => `${i.name} x${i.quantity}`).join(", ");
+          
+          blocksHTML += `
+            <div class="order-block">
+              <strong>Order Date:</strong> ${dateStr} <br>
+              <strong>Items:</strong> ${itemsLine} <br>
+              <strong>Total Amount paid:</strong> $${parseFloat(order.orderTotal).toFixed(2)}<br>
+              <strong>Sent To:</strong> ${order.shippingAddress}
+            </div>
+          `;
+        });
+
+        target.innerHTML = blocksHTML || "No purchase history found for this profile.";
+      } catch (err) {
+        console.error(err);
+        target.innerHTML = "Failed to load dynamic order portfolio database records.";
+      }
     }
 
     /* THEMES */
@@ -587,30 +799,44 @@
         document.documentElement.style.setProperty('--bg', '#f4f5f7');
         document.documentElement.style.setProperty('--card', '#ffffff');
         document.documentElement.style.setProperty('--text', '#1f2937');
+        document.documentElement.style.setProperty('--primary', '#7c3aed');
+        document.documentElement.style.setProperty('--secondary', '#06b6d4');
+        document.documentElement.style.setProperty('--border', '#e5e7eb');
       }
       else if(theme === "dark"){
         document.documentElement.style.setProperty('--bg', '#111827');
         document.documentElement.style.setProperty('--card', '#1f2937');
         document.documentElement.style.setProperty('--text', '#ffffff');
+        document.documentElement.style.setProperty('--primary', '#a78bfa');
+        document.documentElement.style.setProperty('--secondary', '#22d3ee');
+        document.documentElement.style.setProperty('--border', '#374151');
       }
       else if(theme === "blue"){
         document.documentElement.style.setProperty('--bg', '#dbeafe');
         document.documentElement.style.setProperty('--card', '#ffffff');
         document.documentElement.style.setProperty('--text', '#1e3a8a');
+        document.documentElement.style.setProperty('--primary', '#2563eb');
+        document.documentElement.style.setProperty('--secondary', '#3b82f6');
+        document.documentElement.style.setProperty('--border', '#bfdbfe');
       }
       else if(theme === "green"){
         document.documentElement.style.setProperty('--bg', '#dcfce7');
         document.documentElement.style.setProperty('--card', '#ffffff');
         document.documentElement.style.setProperty('--text', '#14532d');
+        document.documentElement.style.setProperty('--primary', '#16a34a');
+        document.documentElement.style.setProperty('--secondary', '#4ade80');
+        document.documentElement.style.setProperty('--border', '#bbf7d0');
       }
       else if(theme === "pink"){
         document.documentElement.style.setProperty('--bg', '#fce7f3');
         document.documentElement.style.setProperty('--card', '#ffffff');
         document.documentElement.style.setProperty('--text', '#831843');
+        document.documentElement.style.setProperty('--primary', '#db2777');
+        document.documentElement.style.setProperty('--secondary', '#f472b6');
+        document.documentElement.style.setProperty('--border', '#fbcfe8');
       }
     }
 
-    // Run data fetching sequence
     loadProductsFromFirebase();
   </script>
 
