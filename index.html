@@ -156,6 +156,10 @@
       cursor:pointer;
       font-weight:bold;
     }
+    .checkout-btn:disabled, .btn:disabled {
+      background: #9ca3af !important;
+      cursor: not-allowed;
+    }
     /* SECTION */
     .section-title{
       font-size:34px;
@@ -411,9 +415,9 @@
       <input type="text" id="customerName" placeholder="Full Name">
       <input type="email" id="customerEmail" placeholder="Email Address" disabled>
       <input type="text" id="customerAddress" placeholder="Shipping Address">
-      <button class="btn" onclick="completeCheckout()">Complete Purchase</button>
+      <button id="submitPurchaseBtn" class="btn" onclick="completeCheckout()">Complete Purchase</button>
       <br><br>
-      <button class="btn" onclick="closeCheckout()">Cancel</button>
+      <button class="btn" style="background:gray;" onclick="closeCheckout()">Cancel</button>
     </div>
   </div>
 
@@ -690,7 +694,13 @@
         return;
       }
       
-      // Auto-populate the disabled email from the authenticated user context
+      // Reset purchase button state
+      const purchaseBtn = document.getElementById("submitPurchaseBtn");
+      if(purchaseBtn) {
+        purchaseBtn.disabled = false;
+        purchaseBtn.innerText = "Complete Purchase";
+      }
+
       document.getElementById("customerEmail").value = currentUser.email;
       document.getElementById("checkoutModal").style.display = "flex";
     }
@@ -701,20 +711,26 @@
 
     window.completeCheckout = async function() {
       const name = document.getElementById("customerName").value;
-      const email = currentUser.email; // Pull explicitly from Auth Object
+      const email = currentUser.email;
       const address = document.getElementById("customerAddress").value;
+      const purchaseBtn = document.getElementById("submitPurchaseBtn");
 
       if(name === "" || address === ""){
         alert("Please complete the required form elements.");
         return;
       }
 
+      // Upgrade 1: Freeze button immediately to stop double-clicking bugs
+      if(purchaseBtn) {
+        purchaseBtn.disabled = true;
+        purchaseBtn.innerText = "Processing Order...";
+      }
+
       const finalTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
       const itemsSummaryString = cart.map(i => `${i.name} (x${i.quantity})`).join(", ");
 
       try {
-        // 1. Write permanent order record bound to Auth Profile UID 
-        // If Firebase Security Rules reject this, it throws an error instantly
+        // 1. Write to database securely
         await addDoc(collection(db, "orders"), {
           userId: currentUser.uid, 
           customerName: name,
@@ -725,7 +741,7 @@
           timestamp: new Date()
         });
 
-        // 2. Dispatch notification email to store admin via EmailJS
+        // 2. Dispatch merchant alert via EmailJS
         await emailjs.send("service_ac4x93m", "template_zkxy2if", {
           customerName: name,
           customerEmail: email,
@@ -734,7 +750,7 @@
           items: itemsSummaryString
         });
 
-        // 3. Dispatch automated confirmation receipt to customer inbox via EmailJS
+        // 3. Dispatch confirmation receipt via EmailJS
         await emailjs.send("service_ac4x93m", "template_yfyv18b", {
           customerName: name,
           customerEmail: email,
@@ -745,37 +761,42 @@
         
         alert("Thank you for your purchase, " + name + "! Your order was processed and a confirmation email has been sent.");
         
-        // Clear cart only on SUCCESS
         cart = [];
         updateCart();
+        window.closeCheckout();
         
         // Refresh orders locally
         loadOrderHistory(currentUser.uid);
       } catch (e) {
         console.error("Security/Execution Profile Error: ", e);
-        alert("Transaction failed: Your order could not be processed securely. Please check your connection or account status.");
+        alert("Transaction failed: Your order could not be processed securely.");
+        if(purchaseBtn) {
+          purchaseBtn.disabled = false;
+          purchaseBtn.innerText = "Complete Purchase";
+        }
       }
-
-      window.closeCheckout();
     }
 
     /* FETCH ORDER HISTORY */
     async function loadOrderHistory(uid) {
       const target = document.getElementById("historyContent");
+      if(!target) return;
+
       try {
         // Query to match current authenticated UID
         const q = query(collection(db, "orders"), where("userId", "==", uid));
         const querySnapshot = await getDocs(q);
         
+        // Upgrade 2: Zero out innerHTML cleanly before entering layout string builder
+        target.innerHTML = "";
         let blocksHTML = "";
         
-        // Map elements safely
         const sortedDocs = [];
         querySnapshot.forEach((doc) => {
           sortedDocs.push(doc.data());
         });
         
-        // Secure sorting fallback case
+        // Secure sorting chronological fallback case
         sortedDocs.sort((a, b) => {
           const secA = a.timestamp?.seconds || 0;
           const secB = b.timestamp?.seconds || 0;
