@@ -143,13 +143,22 @@
       margin-top: 5px;
     }
 
-    /* HEADER */
-    header{
-      background:linear-gradient(135deg, var(--primary), var(--secondary));
-      color:white;
-      padding:60px;
-      border-radius:25px;
-      margin-bottom:40px;
+    /* HEADER WITH INTERACTIVE TRAILING SPOTLIGHT EFFECT */
+    header {
+      background: #7c3aed; 
+      background: radial-gradient(
+        circle 180px at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+        #06b6d4 0%, 
+        #7c3aed 70%, 
+        #4c1d95 100%
+      );
+      color: white;
+      padding: 60px;
+      border-radius: 25px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.1s ease;
     }
     header h1{
       font-size:52px;
@@ -904,7 +913,7 @@
           customerNote: sayAnythingContent,
           itemsOrdered: cart,
           orderTotalUSD: totalInUSD,
-          orderTotalTWD: absoluteTotalInTWD, // Logged in clean TWD securely
+          orderTotalTWD: absoluteTotalInTWD, // Logged in clean TWD safely
           checkoutCurrency: activeCurrencySymbol,
           customerPaidLocal: customerDisplayTotal,
           timestamp: new Date()
@@ -1031,6 +1040,23 @@
       }
     }
 
+    /* MOUSE INTERACTIVE PURPLE HEADER HOVER TRAILING EFFECT */
+    function initializeHeaderSpotlight() {
+      const headerElement = document.getElementById("home");
+      if (!headerElement) return;
+
+      headerElement.addEventListener("mousemove", (event) => {
+        const bounds = headerElement.getBoundingClientRect();
+        const relativeX = event.clientX - bounds.left;
+        const relativeY = event.clientY - bounds.top;
+
+        headerElement.style.setProperty("--mouse-x", `${relativeX}px`);
+        headerElement.style.setProperty("--mouse-y", `${relativeY}px`);
+      });
+    }
+
+    // Initialize systems
+    initializeHeaderSpotlight();
     loadProductsFromFirebase();
   </script>
 
