@@ -143,22 +143,37 @@
       margin-top: 5px;
     }
 
-    /* HEADER WITH INTERACTIVE TRAILING SPOTLIGHT EFFECT */
+    /* SUBTLE REFINED SPOTLIGHT OVERLAY STYLE */
     header {
-      background: #7c3aed; 
-      background: radial-gradient(
-        circle 180px at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-        #06b6d4 0%, 
-        #7c3aed 70%, 
-        #4c1d95 100%
-      );
       color: white;
       padding: 60px;
       border-radius: 25px;
       margin-bottom: 40px;
       position: relative;
       overflow: hidden;
-      transition: background 0.1s ease;
+      /* Uses your original exact theme colors as the primary layer */
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+    }
+    /* An absolute overlay layer that produces the small lighter glow without breaking the backdrop colors */
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      /* Set to 80px radius and produces a premium soft white reflection highlight */
+      background: radial-gradient(
+        circle 80px at var(--mouse-x, -999px) var(--mouse-y, -999px), 
+        rgba(255, 255, 255, 0.22) 0%, 
+        rgba(255, 255, 255, 0) 100%
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+    header h1, header p, header input {
+      position: relative;
+      z-index: 2; /* Ensures clickable content remains above the effect overlay */
     }
     header h1{
       font-size:52px;
@@ -1052,6 +1067,12 @@
 
         headerElement.style.setProperty("--mouse-x", `${relativeX}px`);
         headerElement.style.setProperty("--mouse-y", `${relativeY}px`);
+      });
+
+      // Hides the spotlight highlight if the user's cursor leaves the purple element canvas boundary
+      headerElement.addEventListener("mouseleave", () => {
+        headerElement.style.setProperty("--mouse-x", `-999px`);
+        headerElement.style.setProperty("--mouse-y", `-999px`);
       });
     }
 
