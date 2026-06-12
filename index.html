@@ -694,7 +694,6 @@
         return;
       }
       
-      // Reset purchase button state
       const purchaseBtn = document.getElementById("submitPurchaseBtn");
       if(purchaseBtn) {
         purchaseBtn.disabled = false;
@@ -720,7 +719,6 @@
         return;
       }
 
-      // Upgrade 1: Freeze button immediately to stop double-clicking bugs
       if(purchaseBtn) {
         purchaseBtn.disabled = true;
         purchaseBtn.innerText = "Processing Order...";
@@ -730,7 +728,6 @@
       const itemsSummaryString = cart.map(i => `${i.name} (x${i.quantity})`).join(", ");
 
       try {
-        // 1. Write to database securely
         await addDoc(collection(db, "orders"), {
           userId: currentUser.uid, 
           customerName: name,
@@ -741,7 +738,6 @@
           timestamp: new Date()
         });
 
-        // 2. Dispatch merchant alert via EmailJS
         await emailjs.send("service_ac4x93m", "template_zkxy2if", {
           customerName: name,
           customerEmail: email,
@@ -750,7 +746,6 @@
           items: itemsSummaryString
         });
 
-        // 3. Dispatch confirmation receipt via EmailJS
         await emailjs.send("service_ac4x93m", "template_yfyv18b", {
           customerName: name,
           customerEmail: email,
@@ -765,7 +760,6 @@
         updateCart();
         window.closeCheckout();
         
-        // Refresh orders locally
         loadOrderHistory(currentUser.uid);
       } catch (e) {
         console.error("Security/Execution Profile Error: ", e);
@@ -783,11 +777,9 @@
       if(!target) return;
 
       try {
-        // Query to match current authenticated UID
         const q = query(collection(db, "orders"), where("userId", "==", uid));
         const querySnapshot = await getDocs(q);
         
-        // Upgrade 2: Zero out innerHTML cleanly before entering layout string builder
         target.innerHTML = "";
         let blocksHTML = "";
         
@@ -796,7 +788,6 @@
           sortedDocs.push(doc.data());
         });
         
-        // Secure sorting chronological fallback case
         sortedDocs.sort((a, b) => {
           const secA = a.timestamp?.seconds || 0;
           const secB = b.timestamp?.seconds || 0;
@@ -804,12 +795,13 @@
         });
 
         sortedDocs.forEach((order) => {
-          const dateStr = order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleDateString() : "Recent";
+          // Changed from .toLocaleDateString() to .toLocaleString() to append the precise time
+          const dateStr = order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleString() : "Recent";
           const itemsLine = (order.itemsOrdered || []).map(i => `${i.name} x${i.quantity}`).join(", ");
           
           blocksHTML += `
             <div class="order-block">
-              <strong>Order Date:</strong> ${dateStr} <br>
+              <strong>Order Date & Time:</strong> ${dateStr} <br>
               <strong>Items:</strong> ${itemsLine} <br>
               <strong>Total Amount paid:</strong> $${parseFloat(order.orderTotal || 0).toFixed(2)}<br>
               <strong>Sent To:</strong> ${order.shippingAddress || "N/A"}
