@@ -297,35 +297,32 @@
     .order-block:last-child {
       border-bottom: none;
     }
-    /* CONTACT & FEEDBACK BOX */
-    .contact-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 30px;
-      margin-top: 60px;
-    }
-    .contact-section, .feedback-section{
+    /* CONTACT SECTION */
+    .contact-section {
       background:var(--card);
       padding:35px;
       border-radius:25px;
       box-shadow:0 10px 30px rgba(0,0,0,0.06);
       border: 1px solid var(--border);
+      margin-top: 60px;
+      max-width: 600px;
     }
     .contact-info p{
       margin-bottom:15px;
       font-size:18px;
     }
-    .feedback-section textarea {
+    /* CHECKOUT MODAL TEXTAREA */
+    .modal-content textarea {
       width: 100%;
-      height: 120px;
-      padding: 15px;
-      border-radius: 12px;
+      height: 90px;
+      padding: 14px;
+      margin-bottom: 15px;
+      border-radius: 10px;
       border: 1px solid var(--border);
       background: var(--bg);
       color: var(--text);
-      font-size: 16px;
+      font-size: 14px;
       resize: none;
-      margin-bottom: 15px;
     }
     /* MODAL */
     .modal{
@@ -402,9 +399,6 @@
         top:0;
         margin-bottom:20px;
       }
-      .contact-grid {
-        grid-template-columns: 1fr;
-      }
     }
   </style>
 
@@ -473,24 +467,15 @@
       </div>
     </section>
 
-    <div class="contact-grid" id="contact">
-      <section class="contact-section">
-        <h2 style="font-size:26px; margin-bottom:20px;">Contact Us</h2>
-        <div class="contact-info">
-          <p>Email: support@studyhub.com</p>
-          <p>Phone: +1 234 567 890</p>
-          <p>Address: 25 Modern Student Avenue</p>
-          <p>Hours: Monday - Friday 9AM - 6PM</p>
-        </div>
-      </section>
-
-      <section class="feedback-section">
-        <h2 style="font-size:26px; margin-bottom:20px;">Say Anything</h2>
-        <p style="font-size:14px; color:gray; margin-bottom:10px;">Have a question, feedback, or a customized request? Type it below to email us instantly.</p>
-        <textarea id="feedbackMessage" placeholder="Type your notes or questions here..."></textarea>
-        <button id="sendFeedbackBtn" class="btn" onclick="sendCustomFeedback()">Send Message</button>
-      </section>
-    </div>
+    <section class="contact-section" id="contact">
+      <h2 style="font-size:26px; margin-bottom:20px;">Contact Us</h2>
+      <div class="contact-info">
+        <p>Email: yp11251217@yphs.tp.edu.tw</p>
+        <p>Phone: +886 966 538 230</p>
+        <p>Address: No. 2, Lane 143, Section 1, Jianguo South Road, Da'an District, Taipei City, Taiwan 106</p>
+        <p>Hours: Monday - Friday 9AM - 6PM</p>
+      </div>
+    </section>
 
     <footer>
       <p>© 2026 StudyHub Store</p>
@@ -507,6 +492,10 @@
       <input type="text" id="customerName" placeholder="Full Name">
       <input type="email" id="customerEmail" placeholder="Email Address" disabled>
       <input type="text" id="customerAddress" placeholder="Shipping Address">
+      
+      <label style="font-size: 13px; color: gray; display: block; margin-bottom: 5px; font-weight: bold;">Say Anything (Optional request/note):</label>
+      <textarea id="checkoutFeedbackMessage" placeholder="Type any custom requests, questions, or notes here..."></textarea>
+      
       <button id="submitPurchaseBtn" class="btn" onclick="completeCheckout()">Complete Purchase</button>
       <br><br>
       <button class="btn" style="background:gray;" onclick="closeCheckout()">Cancel</button>
@@ -562,13 +551,11 @@
       ]}
     ];
 
-    // Toggle Dropdown Panel 
     window.toggleProfileDropdown = function() {
       const dd = document.getElementById("profileDropdown");
       dd.style.display = (dd.style.display === "flex") ? "none" : "flex";
     }
 
-    // Auth Event Sync
     onAuthStateChanged(auth, (user) => {
       const userAvatar = document.getElementById("userAvatar");
       const dropdownEmail = document.getElementById("dropdownEmail");
@@ -596,42 +583,6 @@
         document.getElementById("historyContent").innerHTML = "Please login to view your orders.";
       }
     });
-
-    /* EMAILJS SAY ANYTHING FEATURE */
-    window.sendCustomFeedback = async function() {
-      const messageField = document.getElementById("feedbackMessage");
-      const submitBtn = document.getElementById("sendFeedbackBtn");
-      const messageContent = messageField.value.trim();
-
-      if(!messageContent) {
-        alert("Please write something into the message box first.");
-        return;
-      }
-
-      const userIdentity = currentUser ? currentUser.email : "Anonymous Guest User";
-
-      try {
-        submitBtn.disabled = true;
-        submitBtn.innerText = "Sending Message...";
-
-        await emailjs.send("service_ac4x93m", "template_zkxy2if", {
-          customerName: "Say Anything Form",
-          customerEmail: userIdentity,
-          shippingAddress: "Submitted Online via Feedbox",
-          orderTotal: "N/A",
-          items: messageContent
-        });
-
-        alert("Your message was dispatched successfully straight to our inbox!");
-        messageField.value = "";
-      } catch (err) {
-        console.error("Feedback dispatch failure:", err);
-        alert("Failed to send message securely. Please verify your internet connection.");
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Send Message";
-      }
-    }
 
     /* AUTHENTICATION CONTROLLERS */
     window.openAuthModal = function(view = 'login') {
@@ -724,11 +675,9 @@
       try {
         const querySnapshot = await getDocs(collection(db, "categories"));
         const fetchedCategories = [];
-        
         querySnapshot.forEach((doc) => {
           fetchedCategories.push({ id: doc.id, ...doc.data() });
         });
-
         if (fetchedCategories.length === 0) {
           categories = defaultCategoriesBackup;
         } else {
@@ -822,7 +771,7 @@
       cartTotal.innerHTML = total.toFixed(2);
     }
 
-    /* STRATEGIC GATEKEEPER CHECKOUT */
+    /* CHECKOUT OVERHAUL */
     window.openCheckout = function() {
       if(cart.length === 0){
         alert("Your cart is empty");
@@ -841,6 +790,7 @@
       }
 
       document.getElementById("customerEmail").value = currentUser.email;
+      document.getElementById("checkoutFeedbackMessage").value = ""; // Reset say anything field
       document.getElementById("checkoutModal").style.display = "flex";
     }
 
@@ -852,6 +802,7 @@
       const name = document.getElementById("customerName").value;
       const email = currentUser.email;
       const address = document.getElementById("customerAddress").value;
+      const sayAnythingContent = document.getElementById("checkoutFeedbackMessage").value.trim();
       const purchaseBtn = document.getElementById("submitPurchaseBtn");
 
       if(name === "" || address === ""){
@@ -866,8 +817,13 @@
 
       const finalTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
       
-      // Formatting the item line strictly to feed directly into EmailJS {{items}}
-      const itemsSummaryString = cart.map(i => `- ${i.name} (Quantity: ${i.quantity}) - Price Each: $${i.price}`).join("\n");
+      // Compiling items list formatted neatly
+      let itemsSummaryString = cart.map(i => `- ${i.name} (x${i.quantity}) - $${(i.price * i.quantity).toFixed(2)}`).join("\n");
+      
+      // If the customer left a note in the Say Anything field, we append it straight to the items variable string!
+      if(sayAnythingContent !== "") {
+        itemsSummaryString += `\n\n[Customer Note / Say Anything]:\n"${sayAnythingContent}"`;
+      }
 
       try {
         await addDoc(collection(db, "orders"), {
@@ -875,11 +831,13 @@
           customerName: name,
           customerEmail: email,
           shippingAddress: address,
+          customerNote: sayAnythingContent, // Logging the custom note to Firestore separate variable safely
           itemsOrdered: cart,
           orderTotal: finalTotal,
           timestamp: new Date()
         });
 
+        // Dispatches directly into your existing dashboard template
         await emailjs.send("service_ac4x93m", "template_zkxy2if", {
           customerName: name,
           customerEmail: email,
@@ -904,7 +862,7 @@
         
         loadOrderHistory(currentUser.uid);
       } catch (e) {
-        console.error("Security/Execution Profile Error: ", e);
+        console.error("Security Error: ", e);
         alert("Transaction failed: Your order could not be processed securely.");
         if(purchaseBtn) {
           purchaseBtn.disabled = false;
@@ -924,21 +882,17 @@
         
         target.innerHTML = "";
         let blocksHTML = "";
-        
         const sortedDocs = [];
-        querySnapshot.forEach((doc) => {
-          sortedDocs.push(doc.data());
-        });
         
-        sortedDocs.sort((a, b) => {
-          const secA = a.timestamp?.seconds || 0;
-          const secB = b.timestamp?.seconds || 0;
-          return secB - secA;
-        });
+        querySnapshot.forEach((doc) => { sortedDocs.push(doc.data()); });
+        sortedDocs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
 
         sortedDocs.forEach((order) => {
           const dateStr = order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleString() : "Recent";
-          const itemsLine = (order.itemsOrdered || []).map(i => `${i.name} x${i.quantity}`).join(", ");
+          let itemsLine = (order.itemsOrdered || []).map(i => `${i.name} x${i.quantity}`).join(", ");
+          if(order.customerNote) {
+            itemsLine += ` <br><em>Note: "${order.customerNote}"</em>`;
+          }
           
           blocksHTML += `
             <div class="order-block">
