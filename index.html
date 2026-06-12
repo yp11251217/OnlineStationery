@@ -29,6 +29,7 @@
       background:var(--bg);
       color:var(--text);
       transition:0.3s;
+      position: relative;
     }
     /* SIDEBAR */
     .sidebar{
@@ -41,6 +42,7 @@
       padding:25px;
       overflow-y:auto;
       border-right:1px solid var(--border);
+      z-index: 10;
     }
     .logo{
       font-size:30px;
@@ -76,7 +78,60 @@
       margin-left:260px;
       width:100%;
       padding:35px;
+      position: relative;
     }
+
+    /* GOOGLE STYLE CORNER PROFILE */
+    .corner-profile-container {
+      position: absolute;
+      top: 25px;
+      right: 350px; 
+      z-index: 1100;
+    }
+    .avatar-btn {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      border: 2px solid white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: transform 0.2s;
+    }
+    .avatar-btn:hover {
+      transform: scale(1.05);
+    }
+    .profile-dropdown {
+      position: absolute;
+      top: 55px;
+      right: 0;
+      width: 280px;
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      border: 1px solid var(--border);
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .profile-dropdown h4 {
+      font-size: 14px;
+      color: gray;
+    }
+    .profile-dropdown .user-email {
+      font-weight: bold;
+      font-size: 15px;
+      word-break: break-all;
+      margin-bottom: 5px;
+    }
+
     /* HEADER */
     header{
       background:linear-gradient(135deg, var(--primary), var(--secondary));
@@ -188,9 +243,6 @@
       height:220px;
       object-fit:cover;
     }
-    .product-content{
-      padding:20px;
-    }
     .product-content h3{
       margin-bottom:10px;
       font-size:22px;
@@ -245,18 +297,35 @@
     .order-block:last-child {
       border-bottom: none;
     }
-    /* CONTACT */
-    .contact-section{
+    /* CONTACT & FEEDBACK BOX */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-top: 60px;
+    }
+    .contact-section, .feedback-section{
       background:var(--card);
       padding:35px;
       border-radius:25px;
-      margin-top:60px;
       box-shadow:0 10px 30px rgba(0,0,0,0.06);
       border: 1px solid var(--border);
     }
     .contact-info p{
       margin-bottom:15px;
       font-size:18px;
+    }
+    .feedback-section textarea {
+      width: 100%;
+      height: 120px;
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      resize: none;
+      margin-bottom: 15px;
     }
     /* MODAL */
     .modal{
@@ -321,12 +390,20 @@
       .main{
         margin-left:0;
       }
+      .corner-profile-container {
+        position: fixed;
+        top: 15px;
+        right: 20px;
+      }
       .cart-box{
         position:relative;
         width:100%;
         right:0;
         top:0;
         margin-bottom:20px;
+      }
+      .contact-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -338,11 +415,6 @@
 
   <div class="sidebar">
     <div class="logo">StudyHub</div>
-    
-    <div class="menu-title">Account</div>
-    <span id="userStatus" style="padding: 14px; font-weight: bold; display: block; font-size: 14px;">Loading profile...</span>
-    <a id="authLink" onclick="openAuthModal()">Login / Register</a>
-    <a id="historyLink" href="#history" style="display:none;">My Order History</a>
 
     <div class="menu-title">Navigation</div>
     <a href="#home">Home</a>
@@ -356,6 +428,18 @@
   </div>
 
   <div class="main">
+    
+    <div class="corner-profile-container">
+      <div class="avatar-btn" id="userAvatar" onclick="toggleProfileDropdown()">G</div>
+      <div class="profile-dropdown" id="profileDropdown">
+        <h4>Account Status</h4>
+        <div class="user-email" id="dropdownEmail">Guest Mode</div>
+        <hr style="border-color: var(--border); margin: 5px 0 10px 0;">
+        <button id="authLink" class="btn" onclick="openAuthModal()">Login / Register</button>
+        <a id="historyLink" href="#history" class="btn" style="display:none; text-align:center; text-decoration:none; background:var(--secondary); margin-top:5px;" onclick="toggleProfileDropdown()">View My Orders</a>
+      </div>
+    </div>
+
     <div class="cart-box">
       <h3>Shopping Cart</h3>
       <div id="cartItems" class="cart-items">Cart is empty</div>
@@ -389,15 +473,24 @@
       </div>
     </section>
 
-    <section class="contact-section" id="contact">
-      <h2 class="section-title">Contact Us</h2>
-      <div class="contact-info">
-        <p>Email: yp11251217@yphs.tp.edu.tw</p>
-        <p>Phone: +886 966 538 230</p>
-        <p>Address: No. 2, Lane 143, Section 1, Jianguo South Road, Da'an District, Taipei City, Taiwan 106</p>
-        <p>Hours: Monday - Friday 9AM - 6PM</p>
-      </div>
-    </section>
+    <div class="contact-grid" id="contact">
+      <section class="contact-section">
+        <h2 style="font-size:26px; margin-bottom:20px;">Contact Us</h2>
+        <div class="contact-info">
+          <p>Email: support@studyhub.com</p>
+          <p>Phone: +1 234 567 890</p>
+          <p>Address: 25 Modern Student Avenue</p>
+          <p>Hours: Monday - Friday 9AM - 6PM</p>
+        </div>
+      </section>
+
+      <section class="feedback-section">
+        <h2 style="font-size:26px; margin-bottom:20px;">Say Anything</h2>
+        <p style="font-size:14px; color:gray; margin-bottom:10px;">Have a question, feedback, or a customized request? Type it below to email us instantly.</p>
+        <textarea id="feedbackMessage" placeholder="Type your notes or questions here..."></textarea>
+        <button id="sendFeedbackBtn" class="btn" onclick="sendCustomFeedback()">Send Message</button>
+      </section>
+    </div>
 
     <footer>
       <p>© 2026 StudyHub Store</p>
@@ -405,8 +498,7 @@
   </div>
 
   <div class="modal" id="authModal">
-    <div class="modal-content" id="authContentMode">
-      </div>
+    <div class="modal-content" id="authContentMode"></div>
   </div>
 
   <div class="modal" id="checkoutModal">
@@ -426,12 +518,12 @@
     import { getFirestore, collection, getDocs, addDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // 1. Initialize EmailJS
+    // Initialize EmailJS
     emailjs.init({
       publicKey: "MfuY9QAtvgIlEE6-C", 
     });
 
-    // 2. Initialize Firebase
+    // Initialize Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBk4oHd6qcwHsEAtOCMD2AtVGm1nG1JPds",
       authDomain: "onlinestore-542e0.firebaseapp.com",
@@ -470,24 +562,33 @@
       ]}
     ];
 
-    // Auth Change Tracking Dashboard Status UI updates
+    // Toggle Dropdown Panel 
+    window.toggleProfileDropdown = function() {
+      const dd = document.getElementById("profileDropdown");
+      dd.style.display = (dd.style.display === "flex") ? "none" : "flex";
+    }
+
+    // Auth Event Sync
     onAuthStateChanged(auth, (user) => {
-      const userStatus = document.getElementById("userStatus");
+      const userAvatar = document.getElementById("userAvatar");
+      const dropdownEmail = document.getElementById("dropdownEmail");
       const authLink = document.getElementById("authLink");
       const historyLink = document.getElementById("historyLink");
       const historySection = document.getElementById("history");
 
       if (user) {
         currentUser = user;
-        userStatus.innerText = `Logged in: ${user.email}`;
-        authLink.innerText = "Logout";
+        userAvatar.innerText = user.email.charAt(0).toUpperCase();
+        dropdownEmail.innerText = user.email;
+        authLink.innerText = "Logout Profile";
         authLink.setAttribute("onclick", "handleLogout()");
         historyLink.style.display = "block";
         historySection.style.display = "block";
         loadOrderHistory(user.uid);
       } else {
         currentUser = null;
-        userStatus.innerText = "Guest Mode";
+        userAvatar.innerText = "G";
+        dropdownEmail.innerText = "Guest Mode";
         authLink.innerText = "Login / Register";
         authLink.setAttribute("onclick", "openAuthModal()");
         historyLink.style.display = "none";
@@ -495,6 +596,42 @@
         document.getElementById("historyContent").innerHTML = "Please login to view your orders.";
       }
     });
+
+    /* EMAILJS SAY ANYTHING FEATURE */
+    window.sendCustomFeedback = async function() {
+      const messageField = document.getElementById("feedbackMessage");
+      const submitBtn = document.getElementById("sendFeedbackBtn");
+      const messageContent = messageField.value.trim();
+
+      if(!messageContent) {
+        alert("Please write something into the message box first.");
+        return;
+      }
+
+      const userIdentity = currentUser ? currentUser.email : "Anonymous Guest User";
+
+      try {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Sending Message...";
+
+        await emailjs.send("service_ac4x93m", "template_zkxy2if", {
+          customerName: "Say Anything Form",
+          customerEmail: userIdentity,
+          shippingAddress: "Submitted Online via Feedbox",
+          orderTotal: "N/A",
+          items: messageContent
+        });
+
+        alert("Your message was dispatched successfully straight to our inbox!");
+        messageField.value = "";
+      } catch (err) {
+        console.error("Feedback dispatch failure:", err);
+        alert("Failed to send message securely. Please verify your internet connection.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Send Message";
+      }
+    }
 
     /* AUTHENTICATION CONTROLLERS */
     window.openAuthModal = function(view = 'login') {
@@ -543,6 +680,7 @@
         await signInWithEmailAndPassword(auth, email, pass);
         alert("Logged in successfully!");
         closeAuthModal();
+        document.getElementById("profileDropdown").style.display = "none";
       } catch (err) {
         alert("Error logging in: " + err.message);
       }
@@ -555,6 +693,7 @@
         await createUserWithEmailAndPassword(auth, email, pass);
         alert("Account registered successfully!");
         closeAuthModal();
+        document.getElementById("profileDropdown").style.display = "none";
       } catch (err) {
         alert("Error creating profile: " + err.message);
       }
@@ -576,6 +715,7 @@
       if(confirm("Confirm logging out of StudyHub profile?")) {
         await signOut(auth);
         alert("Logged out successfully.");
+        document.getElementById("profileDropdown").style.display = "none";
       }
     }
 
@@ -611,7 +751,7 @@
             categoryHTML += `
               <div class="product-card">
                 <img src="${product.image}" loading="lazy" alt="${product.name}">
-                <div class="product-content">
+                <div class="product-content" style="padding: 20px;">
                   <h3>${product.name}</h3>
                   <p class="price">$${product.price}</p>
                   <button class="btn" onclick='addToCart("${product.name.replace(/'/g, "\\'")}", ${product.price})'>Add To Cart</button>
@@ -725,7 +865,9 @@
       }
 
       const finalTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-      const itemsSummaryString = cart.map(i => `${i.name} (x${i.quantity})`).join(", ");
+      
+      // Formatting the item line strictly to feed directly into EmailJS {{items}}
+      const itemsSummaryString = cart.map(i => `- ${i.name} (Quantity: ${i.quantity}) - Price Each: $${i.price}`).join("\n");
 
       try {
         await addDoc(collection(db, "orders"), {
@@ -795,7 +937,6 @@
         });
 
         sortedDocs.forEach((order) => {
-          // Changed from .toLocaleDateString() to .toLocaleString() to append the precise time
           const dateStr = order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleString() : "Recent";
           const itemsLine = (order.itemsOrdered || []).map(i => `${i.name} x${i.quantity}`).join(", ");
           
