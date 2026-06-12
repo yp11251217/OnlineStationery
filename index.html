@@ -131,6 +131,17 @@
       word-break: break-all;
       margin-bottom: 5px;
     }
+    .country-selector {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: bold;
+      margin-top: 5px;
+    }
 
     /* HEADER */
     header{
@@ -428,7 +439,20 @@
       <div class="profile-dropdown" id="profileDropdown">
         <h4>Account Status</h4>
         <div class="user-email" id="dropdownEmail">Guest Mode</div>
-        <hr style="border-color: var(--border); margin: 5px 0 10px 0;">
+        
+        <hr style="border-color: var(--border); margin: 5px 0 5px 0;">
+        
+        <h4>Select Country / Region</h4>
+        <select id="countryCurrencySelector" class="country-selector" onchange="changeStoreCurrency()">
+          <option value="US" selected>United States ($)</option>
+          <option value="Taiwan">Taiwan (NT$)</option>
+          <option value="Japan">Japan (¥)</option>
+          <option value="Korea">South Korea (₩)</option>
+          <option value="Pakistan">Pakistan (Rs.)</option>
+        </select>
+
+        <hr style="border-color: var(--border); margin: 10px 0 10px 0;">
+        
         <button id="authLink" class="btn" onclick="openAuthModal()">Login / Register</button>
         <a id="historyLink" href="#history" class="btn" style="display:none; text-align:center; text-decoration:none; background:var(--secondary); margin-top:5px;" onclick="toggleProfileDropdown()">View My Orders</a>
       </div>
@@ -438,7 +462,7 @@
       <h3>Shopping Cart</h3>
       <div id="cartItems" class="cart-items">Cart is empty</div>
       <div class="cart-total">
-        Total: $<span id="cartTotal">0.00</span>
+        Total: <span id="cartTotalUnit">$</span><span id="cartTotal">0.00</span>
       </div>
       <button class="checkout-btn" onclick="openCheckout()">Checkout</button>
     </div>
@@ -530,6 +554,21 @@
     let categories = [];
     let currentUser = null;
 
+    // CURRENCY CONVERSION CONFIGURATION MATRIX (Baseline structure calibrated entirely to USD)
+    const currencyConfig = {
+      US: { symbol: "$", rate: 1.0 },
+      Taiwan: { symbol: "NT$", rate: 31.65 },    // $1 USD ≈ 31.65 NTD
+      Japan: { symbol: "¥", rate: 153.50 },       // $1 USD ≈ 153.50 JPY
+      Korea: { symbol: "₩", rate: 1345.00 },     // $1 USD ≈ 1345.00 KRW
+      Pakistan: { symbol: "Rs.", rate: 277.35 }   // $1 USD ≈ 277.35 PKR
+    };
+
+    // Global variable tracking for owner payouts (Calibrated conversion factor from baseline USD to output TWD)
+    const usdToTwdRate = 31.65; 
+
+    let selectedCountry = "US";
+
+    // RESTORED ORIGINAL STABLE USD BASE VALUES
     const defaultCategoriesBackup = [
       { id:"writing", title:"Writing Tools", products:[
         { name:"Premium Pen Set", price:12, image:"https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?q=80&w=1000&auto=format&fit=crop" },
@@ -583,6 +622,13 @@
         document.getElementById("historyContent").innerHTML = "Please login to view your orders.";
       }
     });
+
+    /* CURRENCY MUTATION OBSERVER */
+    window.changeStoreCurrency = function() {
+      selectedCountry = document.getElementById("countryCurrencySelector").value;
+      window.renderProducts(document.getElementById("searchInput").value);
+      updateCart();
+    }
 
     /* AUTHENTICATION CONTROLLERS */
     window.openAuthModal = function(view = 'login') {
@@ -693,16 +739,22 @@
     window.renderProducts = function(filter="") {
       const productSections = document.getElementById("productSections");
       productSections.innerHTML = "";
+      
+      const currency = currencyConfig[selectedCountry];
+
       categories.forEach((category)=>{
         let categoryHTML = "";
         category.products.forEach((product)=>{
           if(product.name.toLowerCase().includes(filter.toLowerCase())){
+            // Dynamic Conversion processing
+            const displayPrice = (product.price * currency.rate).toFixed(currency.rate === 1.0 ? 2 : 0);
+            
             categoryHTML += `
               <div class="product-card">
                 <img src="${product.image}" loading="lazy" alt="${product.name}">
                 <div class="product-content" style="padding: 20px;">
                   <h3>${product.name}</h3>
-                  <p class="price">$${product.price}</p>
+                  <p class="price">${currency.symbol}${displayPrice}</p>
                   <button class="btn" onclick='addToCart("${product.name.replace(/'/g, "\\'")}", ${product.price})'>Add To Cart</button>
                 </div>
               </div>
@@ -728,12 +780,12 @@
     /* CART SYNCING */
     let cart = [];
 
-    window.addToCart = function(name, price) {
+    window.addToCart = function(name, basePriceUSD) {
       const existing = cart.find(item => item.name === name);
       if(existing){
         existing.quantity++;
       } else {
-        cart.push({ name: name, price: price, quantity: 1 });
+        cart.push({ name: name, price: basePriceUSD, quantity: 1 });
       }
       updateCart();
     }
@@ -746,6 +798,10 @@
     function updateCart() {
       const cartItems = document.getElementById("cartItems");
       const cartTotal = document.getElementById("cartTotal");
+      const cartTotalUnit = document.getElementById("cartTotalUnit");
+      
+      const currency = currencyConfig[selectedCountry];
+      cartTotalUnit.innerText = currency.symbol + " ";
       cartItems.innerHTML = "";
 
       if(cart.length === 0){
@@ -754,24 +810,26 @@
         return;
       }
 
-      let total = 0;
+      let displayTotal = 0;
       cart.forEach((item, index)=>{
-        total += item.price * item.quantity;
+        const displayPriceEach = item.price * currency.rate;
+        displayTotal += displayPriceEach * item.quantity;
+        
         cartItems.innerHTML += `
           <div class="cart-item">
             <div>
               <strong>${item.name}</strong><br>
               Qty: ${item.quantity}<br>
-              $${(item.price * item.quantity).toFixed(2)}
+              ${currency.symbol}${(displayPriceEach * item.quantity).toFixed(currency.rate === 1.0 ? 2 : 0)}
             </div>
             <button class="remove-btn" onclick="removeItem(${index})">X</button>
           </div>
         `;
       });
-      cartTotal.innerHTML = total.toFixed(2);
+      cartTotal.innerHTML = displayTotal.toFixed(currency.rate === 1.0 ? 2 : 0);
     }
 
-    /* CHECKOUT OVERHAUL */
+    /* CHECKOUT WITH HARD TARGET NEW TAIWAN DOLLAR CONVERSIONS */
     window.openCheckout = function() {
       if(cart.length === 0){
         alert("Your cart is empty");
@@ -790,7 +848,7 @@
       }
 
       document.getElementById("customerEmail").value = currentUser.email;
-      document.getElementById("checkoutFeedbackMessage").value = ""; // Reset say anything field
+      document.getElementById("checkoutFeedbackMessage").value = ""; 
       document.getElementById("checkoutModal").style.display = "flex";
     }
 
@@ -815,15 +873,27 @@
         purchaseBtn.innerText = "Processing Order...";
       }
 
-      const finalTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+      // 1. Math calculation for base structural baseline (USD)
+      const totalInUSD = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
       
-      // Compiling items list formatted neatly
-      let itemsSummaryString = cart.map(i => `- ${i.name} (x${i.quantity}) - $${(i.price * i.quantity).toFixed(2)}`).join("\n");
+      // 2. MATH TRANSFORMATION: FORCING CALCULATED VALUE INTO NEW TAIWAN DOLLARS (TWD) FOR HEADQUARTERS PORTAL
+      const absoluteTotalInTWD = Math.round(totalInUSD * usdToTwdRate);
+
+      const activeCurrencySymbol = currencyConfig[selectedCountry].symbol;
+      const activeConversionRate = currencyConfig[selectedCountry].rate;
+      const customerDisplayTotal = (totalInUSD * activeConversionRate).toFixed(activeConversionRate === 1.0 ? 2 : 0);
+
+      // Generating Summary logs
+      let itemsSummaryString = cart.map(i => {
+        const localPrice = (i.price * activeConversionRate).toFixed(activeConversionRate === 1.0 ? 2 : 0);
+        return `- ${i.name} (x${i.quantity}) -> Customer Paid: ${activeCurrencySymbol}${localPrice} [Base Price: $${i.price * i.quantity} USD]`;
+      }).join("\n");
       
-      // If the customer left a note in the Say Anything field, we append it straight to the items variable string!
       if(sayAnythingContent !== "") {
         itemsSummaryString += `\n\n[Customer Note / Say Anything]:\n"${sayAnythingContent}"`;
       }
+      
+      itemsSummaryString += `\n\n(Country setting selected at checkout: ${selectedCountry})`;
 
       try {
         await addDoc(collection(db, "orders"), {
@@ -831,18 +901,21 @@
           customerName: name,
           customerEmail: email,
           shippingAddress: address,
-          customerNote: sayAnythingContent, // Logging the custom note to Firestore separate variable safely
+          customerNote: sayAnythingContent,
           itemsOrdered: cart,
-          orderTotal: finalTotal,
+          orderTotalUSD: totalInUSD,
+          orderTotalTWD: absoluteTotalInTWD, // Logged in clean TWD securely
+          checkoutCurrency: activeCurrencySymbol,
+          customerPaidLocal: customerDisplayTotal,
           timestamp: new Date()
         });
 
-        // Dispatches directly into your existing dashboard template
+        // Dispatches EmailJS to you with forced TWD calculations
         await emailjs.send("service_ac4x93m", "template_zkxy2if", {
           customerName: name,
           customerEmail: email,
           shippingAddress: address,
-          orderTotal: finalTotal.toFixed(2),
+          orderTotal: `NT$ ${absoluteTotalInTWD} (Customer View: ${activeCurrencySymbol}${customerDisplayTotal})`,
           items: itemsSummaryString
         });
 
@@ -850,11 +923,11 @@
           customerName: name,
           customerEmail: email,
           shippingAddress: address,
-          orderTotal: finalTotal.toFixed(2),
+          orderTotal: `NT$ ${absoluteTotalInTWD} (Customer View: ${activeCurrencySymbol}${customerDisplayTotal})`,
           items: itemsSummaryString
         });
         
-        alert("Thank you for your purchase, " + name + "! Your order was processed and a confirmation email has been sent.");
+        alert("Thank you for your purchase, " + name + "! Your order was processed successfully. You paid " + activeCurrencySymbol + customerDisplayTotal + ".");
         
         cart = [];
         updateCart();
@@ -894,11 +967,14 @@
             itemsLine += ` <br><em>Note: "${order.customerNote}"</em>`;
           }
           
+          const localDisplay = order.checkoutCurrency ? `${order.checkoutCurrency}${order.customerPaidLocal}` : `$${order.orderTotalUSD}`;
+          const twdFallback = order.orderTotalTWD ? ` (NT$${order.orderTotalTWD})` : "";
+
           blocksHTML += `
             <div class="order-block">
               <strong>Order Date & Time:</strong> ${dateStr} <br>
               <strong>Items:</strong> ${itemsLine} <br>
-              <strong>Total Amount paid:</strong> $${parseFloat(order.orderTotal || 0).toFixed(2)}<br>
+              <strong>Total Amount paid:</strong> ${localDisplay}${twdFallback}<br>
               <strong>Sent To:</strong> ${order.shippingAddress || "N/A"}
             </div>
           `;
