@@ -388,9 +388,9 @@
     <section class="contact-section" id="contact">
       <h2 class="section-title">Contact Us</h2>
       <div class="contact-info">
-        <p>Email: support@studyhub.com</p>
-        <p>Phone: +1 234 567 890</p>
-        <p>Address: 25 Modern Student Avenue</p>
+        <p>Email: yp11251217@yphs.tp.edu.tw</p>
+        <p>Phone: +886 966 538 230</p>
+        <p>Address: No. 2, Lane 143, Section 1, Jianguo South Road, Da'an District, Taipei City, Taiwan 106</p>
         <p>Hours: Monday - Friday 9AM - 6PM</p>
       </div>
     </section>
@@ -419,7 +419,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, addDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, addDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     // 1. Initialize EmailJS
@@ -598,6 +598,7 @@
     }
 
     window.renderProducts = function(filter="") {
+      const productSections = document.getElementById("productSections");
       productSections.innerHTML = "";
       categories.forEach((category)=>{
         let categoryHTML = "";
@@ -713,6 +714,7 @@
 
       try {
         // 1. Write permanent order record bound to Auth Profile UID 
+        // If Firebase Security Rules reject this, it throws an error instantly
         await addDoc(collection(db, "orders"), {
           userId: currentUser.uid, 
           customerName: name,
@@ -743,15 +745,17 @@
         
         alert("Thank you for your purchase, " + name + "! Your order was processed and a confirmation email has been sent.");
         
+        // Clear cart only on SUCCESS
+        cart = [];
+        updateCart();
+        
         // Refresh orders locally
         loadOrderHistory(currentUser.uid);
       } catch (e) {
-        console.error("Execution profile error: ", e);
-        alert("Transaction completed locally.");
+        console.error("Security/Execution Profile Error: ", e);
+        alert("Transaction failed: Your order could not be processed securely. Please check your connection or account status.");
       }
 
-      cart = [];
-      updateCart();
       window.closeCheckout();
     }
 
@@ -765,31 +769,37 @@
         
         let blocksHTML = "";
         
-        // Sort items chronologically local side to prevent setup indexing issues instantly
+        // Map elements safely
         const sortedDocs = [];
         querySnapshot.forEach((doc) => {
           sortedDocs.push(doc.data());
         });
-        sortedDocs.sort((a,b) => b.timestamp?.seconds - a.timestamp?.seconds);
+        
+        // Secure sorting fallback case
+        sortedDocs.sort((a, b) => {
+          const secA = a.timestamp?.seconds || 0;
+          const secB = b.timestamp?.seconds || 0;
+          return secB - secA;
+        });
 
         sortedDocs.forEach((order) => {
           const dateStr = order.timestamp ? new Date(order.timestamp.seconds * 1000).toLocaleDateString() : "Recent";
-          const itemsLine = order.itemsOrdered.map(i => `${i.name} x${i.quantity}`).join(", ");
+          const itemsLine = (order.itemsOrdered || []).map(i => `${i.name} x${i.quantity}`).join(", ");
           
           blocksHTML += `
             <div class="order-block">
               <strong>Order Date:</strong> ${dateStr} <br>
               <strong>Items:</strong> ${itemsLine} <br>
-              <strong>Total Amount paid:</strong> $${parseFloat(order.orderTotal).toFixed(2)}<br>
-              <strong>Sent To:</strong> ${order.shippingAddress}
+              <strong>Total Amount paid:</strong> $${parseFloat(order.orderTotal || 0).toFixed(2)}<br>
+              <strong>Sent To:</strong> ${order.shippingAddress || "N/A"}
             </div>
           `;
         });
 
         target.innerHTML = blocksHTML || "No purchase history found for this profile.";
       } catch (err) {
-        console.error(err);
-        target.innerHTML = "Failed to load dynamic order portfolio database records.";
+        console.error("Order history rendering error: ", err);
+        target.innerHTML = "Failed to load dynamic order portfolio database records securely.";
       }
     }
 
